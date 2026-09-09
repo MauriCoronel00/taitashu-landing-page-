@@ -1,0 +1,6 @@
+{
+  "name": "TAITASHU — Burgers al fuego",
+  "description": "TAITASHU — hamburguesas smash hechas al fuego. Doubles, Big Smash y más.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

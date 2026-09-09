@@ -1,0 +1,3340 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>TAITASHU — Burgers al fuego</title>
+  <meta name="description" content="TAITASHU — hamburguesas smash hechas al fuego. Doubles, Big Smash y más." />
+  <meta property="og:title" content="TAITASHU — Burgers al fuego" />
+  <meta property="og:description" content="TAITASHU — hamburguesas smash hechas al fuego. Doubles, Big Smash y más." />
+  <meta property="og:type" content="website" />
+  <link rel="icon" type="image/png" href="./assets/taitashu-logo.png" />
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://unpkg.com/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+
+  <style>
+    :root {
+      --black: #0a0908;
+      --char: #161311;
+      --char-2: #211c19;
+      --cream: #f4ead9;
+      --cream-2: #e9dcc2;
+      --off-white: #f2ede4;
+      --red: #e2231a;
+      --red-dim: #a3160f;
+      --flame-orange: #ff7a1a;
+      --flame-gold: #ffb703;
+      --font-display: 'Anton', sans-serif;
+      --font-body: 'Space Grotesk', sans-serif;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: auto;
+    }
+
+    body {
+      background: var(--black);
+      color: var(--off-white);
+      font-family: var(--font-body);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    ::selection {
+      background: var(--flame-orange);
+      color: #000;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    img, svg {
+      display: block;
+      max-width: 100%;
+    }
+
+    /* Grain Overlay */
+    #grain {
+      position: fixed;
+      inset: 0;
+      z-index: 900;
+      pointer-events: none;
+      opacity: .05;
+      mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    }
+
+    /* Fixed Adaptive Header */
+    #siteHeader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 800;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem clamp(1.2rem, 4vw, 3rem);
+      color: var(--off-white);
+      transition: color 0.25s ease;
+      pointer-events: none;
+    }
+
+    #siteHeader > * {
+      pointer-events: auto;
+    }
+
+    #siteHeader.on-light {
+      color: #000000;
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+    }
+
+    .header-logo img {
+      height: 40px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    .header-wordmark {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      letter-spacing: 0.05em;
+      line-height: 1;
+    }
+
+    .header-wordmark span {
+      color: var(--red);
+    }
+
+    /* Chapter / Heat Readout */
+    .header-readout {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .chapter-label {
+      min-width: 68px;
+    }
+
+    .progress-track {
+      width: 80px;
+      height: 2px;
+      background: rgba(255, 255, 255, 0.2);
+      position: relative;
+      overflow: hidden;
+      border-radius: 1px;
+    }
+
+    #siteHeader.on-light .progress-track {
+      background: rgba(0, 0, 0, 0.15);
+    }
+
+    .progress-fill {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 0%;
+      background: var(--flame-orange);
+      transition: width 0.1s linear;
+    }
+
+    .heat-gauge {
+      font-family: monospace;
+      font-size: 0.82rem;
+      color: var(--flame-orange);
+      min-width: 38px;
+    }
+
+    .header-nav {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+
+    .header-cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.45rem 1rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border: 1px solid currentColor;
+      border-radius: 9999px;
+      transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    }
+
+    .header-cta:hover {
+      background: var(--red);
+      border-color: var(--red);
+      color: #fff !important;
+    }
+
+    .header-cta-wa {
+      background: #25d366;
+      border-color: #25d366;
+      color: #ffffff !important;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.45rem 1.1rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border-radius: 9999px;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 14px rgba(37, 211, 102, 0.35);
+    }
+
+    .header-cta-wa:hover {
+      background: #1eb956;
+      border-color: #1eb956;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(37, 211, 102, 0.45);
+    }
+
+    .header-cta-wa svg {
+      width: 15px;
+      height: 15px;
+      fill: currentColor;
+    }
+
+    /* Film Scroll / Pinned Scenes */
+    #filmScroll {
+      position: relative;
+      width: 100%;
+    }
+
+    .scene {
+      position: relative;
+      height: 100vh;
+      overflow: hidden;
+      width: 100%;
+    }
+
+    .scene-photo {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      will-change: transform;
+    }
+
+    .scene-photo-scrim {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    /* Scene A: Ignicion */
+    #sceneA {
+      background: radial-gradient(ellipse at 50% 20%, rgba(255,122,26,.10), transparent 55%),
+                  linear-gradient(180deg, #050403 0%, #0d0906 45%, #100b08 100%);
+    }
+
+    #photoA {
+      background-image: url('./assets/scene-principal-luque.jpg');
+      background-position: center 30%;
+    }
+
+    .scrim-a {
+      background: radial-gradient(ellipse 70% 50% at 50% 40%, rgba(0,0,0,.15), rgba(0,0,0,.68) 90%),
+                  linear-gradient(180deg, rgba(5,4,3,.42) 0%, rgba(7,5,4,.16) 40%, rgba(8,6,5,.75) 100%);
+    }
+
+    #embers {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .embers-dom {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .ember {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      border-radius: 50%;
+      background: var(--flame-gold);
+      box-shadow: 0 0 4px var(--flame-orange);
+    }
+
+    .hero-copy {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      pointer-events: none;
+      z-index: 20;
+      padding: 0 1.5rem;
+    }
+
+    .hero-logo-mark {
+      width: clamp(90px, 14vw, 150px);
+      height: auto;
+      margin-bottom: 1.2rem;
+      filter: drop-shadow(0 10px 20px rgba(226,35,26,0.35));
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(3.2rem, 13vw, 9.5rem);
+      line-height: .92;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      flex-wrap: nowrap;
+    }
+
+    .hero-title .char {
+      display: inline-block;
+      will-change: transform;
+    }
+
+    .hero-title .char-red {
+      color: var(--red);
+    }
+
+    .hero-sub {
+      color: var(--flame-orange);
+      font-size: clamp(0.85rem, 2vw, 1.25rem);
+      font-weight: 700;
+      letter-spacing: .35em;
+      text-transform: uppercase;
+      margin-top: 1rem;
+      opacity: 0;
+    }
+
+    .hero-badge-local {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(10, 8, 6, 0.7);
+      border: 1px solid rgba(255, 122, 26, 0.5);
+      backdrop-filter: blur(8px);
+      color: var(--flame-gold);
+      font-size: clamp(0.68rem, 1.2vw, 0.78rem);
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      padding: 0.35rem 0.9rem;
+      border-radius: 9999px;
+      margin-bottom: 0.8rem;
+      pointer-events: auto;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    }
+
+    .hero-badge-local span {
+      width: 7px;
+      height: 7px;
+      background: #22c55e;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #22c55e;
+    }
+
+    .hero-tag {
+      color: var(--cream);
+      opacity: 0;
+      font-size: clamp(0.72rem, 1.4vw, 0.92rem);
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      margin-top: 0.6rem;
+    }
+
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+      margin-top: 1.4rem;
+      pointer-events: auto;
+      opacity: 0;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn-hero-primary {
+      background: var(--red);
+      color: #fff !important;
+      font-weight: 700;
+      font-size: 0.82rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.75rem 1.6rem;
+      border-radius: 9999px;
+      transition: all 0.25s ease;
+      box-shadow: 0 6px 20px rgba(226,35,26,0.4);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-hero-primary:hover {
+      background: var(--flame-orange);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px rgba(255,122,26,0.5);
+    }
+
+    .btn-hero-wa {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      background: #25d366;
+      color: #fff !important;
+      font-weight: 700;
+      font-size: 0.82rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.75rem 1.6rem;
+      border-radius: 9999px;
+      transition: all 0.25s ease;
+      box-shadow: 0 6px 20px rgba(37,211,102,0.35);
+    }
+
+    .btn-hero-wa:hover {
+      background: #1eb956;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px rgba(37,211,102,0.45);
+    }
+
+    .btn-hero-wa svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+    }
+
+    /* Scroll cue */
+    .scroll-cue {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      opacity: 0;
+      z-index: 30;
+      pointer-events: none;
+    }
+
+    .cue-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--cream);
+    }
+
+    .cue-line {
+      width: 1px;
+      height: 34px;
+      background: rgba(244, 234, 217, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cue-line::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 40%;
+      background: var(--flame-orange);
+      animation: cueDrip 1.6s ease-in-out infinite;
+    }
+
+    @keyframes cueDrip {
+      0% { transform: translateY(-100%); }
+      100% { transform: translateY(280%); }
+    }
+
+    /* Scene B: Plancha */
+    #sceneB {
+      background: linear-gradient(180deg,#100c0a,#1a1310);
+    }
+
+    #photoB {
+      background-image: url('./assets/scene-neon-wall.jpg');
+      background-position: center 38%;
+    }
+
+    .scrim-b {
+      background: radial-gradient(ellipse 65% 45% at 50% 45%, rgba(5,3,2,.25), transparent 72%),
+                  linear-gradient(180deg, rgba(7,5,4,.35) 0%, rgba(7,5,4,.52) 100%);
+    }
+
+    .heat-blob {
+      position: absolute;
+      filter: blur(18px);
+      border-radius: 44% 56% 52% 48% / 48% 44% 56% 52%;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .heat-blob-1 {
+      width: 340px;
+      height: 260px;
+      top: 14%;
+      left: 8%;
+      background: radial-gradient(circle, var(--flame-orange) 0%, transparent 70%);
+    }
+
+    .heat-blob-2 {
+      width: 280px;
+      height: 300px;
+      top: 46%;
+      right: 10%;
+      background: radial-gradient(circle, var(--flame-gold) 0%, transparent 70%);
+    }
+
+    .smoke-panel {
+      position: absolute;
+      top: -10%;
+      bottom: -10%;
+      width: 56%;
+      filter: blur(4px);
+      opacity: 0.25;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        45deg,
+        rgba(255,255,255,0.06),
+        rgba(255,255,255,0.06) 12px,
+        transparent 12px,
+        transparent 32px
+      );
+      z-index: 6;
+      will-change: transform;
+    }
+
+    .smoke-panel-left { left: 0; }
+    .smoke-panel-right { right: 0; }
+
+    .scene-b-copy {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      z-index: 15;
+      padding: 0 1.5rem;
+    }
+
+    .wipe-title {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 6vw, 4.4rem);
+      letter-spacing: 0.04em;
+      clip-path: inset(0 100% 0 0);
+      line-height: 1;
+      text-transform: uppercase;
+      color: var(--off-white);
+    }
+
+    .scene-b-sub {
+      color: var(--cream);
+      font-size: clamp(0.95rem, 2vw, 1.3rem);
+      margin-top: 1rem;
+      opacity: 0;
+      letter-spacing: 0.05em;
+    }
+
+    /* Scene C: Smash */
+    #sceneC {
+      background: #0a0705;
+    }
+
+    #photoC {
+      background-image: url('./assets/scene-smash.jpg');
+    }
+
+    .scrim-c {
+      background: linear-gradient(180deg, rgba(3,2,2,.5) 0%, rgba(3,2,2,.3) 40%, rgba(3,2,2,.75) 100%);
+    }
+
+    .sear-flash {
+      position: absolute;
+      top: -20%;
+      left: 50%;
+      transform: translateX(-50%) scaleY(0.2);
+      transform-origin: top center;
+      width: 120vw;
+      height: 140%;
+      background: radial-gradient(ellipse at 50% 0%, rgba(255,183,3,.35), rgba(255,122,26,.08) 32%, transparent 60%);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 4;
+    }
+
+    .spatula-line {
+      position: absolute;
+      top: 34%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(70vw, 640px);
+      height: 4px;
+      background: #3a2c22;
+      box-shadow: 0 0 16px rgba(255,122,26,0.5);
+      opacity: 0;
+      z-index: 7;
+    }
+
+    .burger-layers-wrap {
+      position: absolute;
+      top: 38%;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: clamp(1.2rem, 4vw, 3.2rem);
+      z-index: 8;
+    }
+
+    .layer {
+      width: clamp(38px, 5vw, 64px);
+      height: clamp(64px, 9vw, 108px);
+      border-radius: 12px;
+      opacity: 0;
+      transform: translateY(-16px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      position: relative;
+    }
+
+    .layer-crown {
+      background: linear-gradient(180deg, #d4934b, #8a531b);
+      border-top-left-radius: 24px;
+      border-top-right-radius: 24px;
+    }
+    .layer-cheese {
+      background: linear-gradient(180deg, #ffb703, #e59300);
+    }
+    .layer-patty {
+      background: linear-gradient(180deg, #4a1e12, #290d07);
+      border: 1px solid #ff7a1a44;
+    }
+    .layer-bacon {
+      background: linear-gradient(180deg, #96251b, #59100a);
+    }
+    .layer-base {
+      background: linear-gradient(180deg, #a66a2a, #693c0e);
+      border-bottom-left-radius: 20px;
+      border-bottom-right-radius: 20px;
+    }
+
+    .griddle-floor {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 38%;
+      background: linear-gradient(0deg, #0a0705 0%, rgba(10,7,5,0.85) 60%, transparent 100%);
+      z-index: 9;
+    }
+
+    .smash-copy {
+      position: absolute;
+      bottom: 12%;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      opacity: 0;
+      z-index: 12;
+      width: 90%;
+      max-width: 500px;
+    }
+
+    .smash-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--flame-orange);
+      margin-bottom: 0.3rem;
+    }
+
+    .smash-heading {
+      font-family: var(--font-display);
+      font-size: clamp(1.6rem, 4.5vw, 3rem);
+      line-height: 1;
+      text-transform: uppercase;
+    }
+
+    .smoke {
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: var(--off-white);
+      filter: blur(0.5px);
+      pointer-events: none;
+      z-index: 10;
+      opacity: 0;
+    }
+
+    /* Scene D: Servido */
+    #sceneD {
+      background: linear-gradient(180deg, rgba(0,0,0,.15), rgba(0,0,0,.35)),
+                  linear-gradient(160deg,#e2231a,#a3160f 55%,#6f0c08);
+    }
+
+    #photoD {
+      background-image: url('./assets/scene-servido.jpg');
+    }
+
+    .scrim-d {
+      background: linear-gradient(100deg, rgba(7,5,4,.7) 0%, rgba(7,5,4,.35) 45%, rgba(7,5,4,.15) 100%),
+                  linear-gradient(0deg, rgba(4,3,2,.4), transparent 40%);
+    }
+
+    .scene-d-copy {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      left: 0;
+      padding-left: clamp(1.4rem, 8vw, 7rem);
+      z-index: 20;
+      max-width: 700px;
+    }
+
+    .finale-title {
+      font-family: var(--font-display);
+      font-size: clamp(3rem, 11vw, 8rem);
+      line-height: .9;
+      text-transform: uppercase;
+      display: flex;
+      flex-wrap: nowrap;
+      margin-bottom: 1.2rem;
+    }
+
+    .finale-title .char {
+      display: inline-block;
+      clip-path: inset(0 0 100% 0);
+      will-change: clip-path;
+    }
+
+    .finale-tag {
+      color: var(--cream);
+      font-size: clamp(1rem, 2.5vw, 1.7rem);
+      font-weight: 500;
+      opacity: 0;
+      margin-bottom: 1.6rem;
+    }
+
+    .counter-row {
+      display: inline-flex;
+      align-items: center;
+      gap: 1.2rem;
+      padding: 0.6rem 1.4rem;
+      border: 1px solid rgba(244, 234, 217, 0.25);
+      border-radius: 9999px;
+      opacity: 0;
+      background: rgba(10, 9, 8, 0.4);
+      backdrop-filter: blur(8px);
+    }
+
+    .counter-label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--flame-gold);
+    }
+
+    .counter-val {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      letter-spacing: 0.1em;
+      color: #fff;
+    }
+
+    .seam-fade {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 40%, #f4ead9 100%);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 25;
+    }
+
+    /* MAIN / LIGHT SECTIONS */
+    main {
+      background: var(--cream);
+      color: #0a0908;
+      position: relative;
+      z-index: 30;
+    }
+
+    /* SECTION 5: MENU */
+    #menu {
+      padding: clamp(3rem, 6vw, 6rem) clamp(1.2rem, 5vw, 4rem) 4rem;
+      position: relative;
+    }
+
+    .menu-header {
+      max-width: 800px;
+      margin-bottom: 2.5rem;
+    }
+
+    .menu-eyebrow {
+      color: var(--red-dim);
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 0.4rem;
+    }
+
+    .menu-heading {
+      font-family: var(--font-display);
+      font-size: clamp(2.8rem, 7vw, 5.2rem);
+      line-height: .95;
+      text-transform: uppercase;
+      margin-bottom: 0.8rem;
+    }
+
+    .menu-intro {
+      font-size: 1.05rem;
+      line-height: 1.5;
+      opacity: 0.65;
+      max-width: 26ch;
+    }
+
+    /* Pinned Rotating Menu */
+    #menuPin {
+      position: relative;
+      height: 100vh;
+      width: 100%;
+    }
+
+    .menu-sticky-grid {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      display: grid;
+      grid-template-columns: minmax(200px, 300px) 1fr;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    .menu-sidebar {
+      padding: 2rem 0;
+    }
+
+    .menu-index {
+      font-family: var(--font-display);
+      font-size: clamp(3rem, 6vw, 5rem);
+      line-height: 1;
+      color: var(--red);
+      margin-bottom: 1rem;
+    }
+
+    .menu-index span {
+      font-size: 0.45em;
+      color: rgba(0,0,0,0.3);
+      font-family: var(--font-body);
+      font-weight: 700;
+      margin-left: 0.4rem;
+    }
+
+    .menu-progress-track {
+      width: 100%;
+      max-width: 160px;
+      height: 2px;
+      background: rgba(0, 0, 0, 0.12);
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+
+    .menu-progress-fill {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 12.5%;
+      background: var(--red);
+    }
+
+    .menu-hint {
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      opacity: 0.45;
+    }
+
+    .menu-cards-stage {
+      position: relative;
+      height: 100%;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .m-card {
+      position: absolute;
+      width: min(74vw, 400px);
+      background: #fffaf0;
+      padding: 1.6rem 1.5rem 1.8rem;
+      box-shadow: 0 24px 50px rgba(0,0,0,.16);
+      border-radius: 16px;
+      border: 1px solid rgba(0,0,0,0.06);
+      display: flex;
+      flex-direction: column;
+      will-change: transform, opacity;
+    }
+
+    .m-card-thumb {
+      width: 100%;
+      aspect-ratio: 4 / 3.8;
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+      margin-bottom: 1.2rem;
+      background: #e9dcc2;
+    }
+
+    .m-card-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .m-card-badge {
+      position: absolute;
+      top: 0.8rem;
+      left: 0.8rem;
+      background: var(--red);
+      color: #fff;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.25rem 0.6rem;
+      border-radius: 9999px;
+    }
+
+    .m-card-title {
+      font-family: var(--font-display);
+      font-size: 1.45rem;
+      letter-spacing: 0.03em;
+      line-height: 1.1;
+      text-transform: uppercase;
+      margin-bottom: 0.4rem;
+    }
+
+    .m-card-desc {
+      font-size: 0.85rem;
+      line-height: 1.4;
+      opacity: 0.8;
+      margin-bottom: 0.7rem;
+    }
+
+    .m-card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .m-tag {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      background: rgba(0, 0, 0, 0.05);
+      color: var(--char);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .m-card-pricing {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      border-top: 1px solid rgba(0,0,0,0.08);
+      padding-top: 0.7rem;
+      margin-bottom: 0.7rem;
+    }
+
+    .m-price-main {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      letter-spacing: 0.02em;
+      color: var(--char);
+      line-height: 1;
+    }
+
+    .m-price-note {
+      font-size: 0.7rem;
+      opacity: 0.65;
+      margin-top: 0.2rem;
+    }
+
+    .m-price-huerfano {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--red-dim);
+      text-align: right;
+    }
+
+    .m-card-btn-wa {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      width: 100%;
+      background: #25d366;
+      color: #ffffff !important;
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.6rem 0.9rem;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      box-shadow: 0 3px 10px rgba(37, 211, 102, 0.25);
+    }
+
+    .m-card-btn-wa:hover {
+      background: #1eb956;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 14px rgba(37, 211, 102, 0.35);
+    }
+
+    .m-card-btn-wa svg {
+      width: 14px;
+      height: 14px;
+      fill: currentColor;
+    }
+
+    /* Extras Strip */
+    .extras-strip {
+      margin-top: 3rem;
+      border-top: 2px solid rgba(0,0,0,0.1);
+      padding-top: 2.5rem;
+    }
+
+    .extras-title {
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+    }
+
+    .extras-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .extra-card {
+      background: #fffaf0;
+      padding: 1.2rem 1.4rem;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      border: 1px solid rgba(0,0,0,0.05);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.04);
+    }
+
+    .extra-thumb {
+      width: 70px;
+      height: 70px;
+      border-radius: 8px;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    .extra-info-name {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      text-transform: uppercase;
+      line-height: 1.2;
+    }
+
+    .extra-info-price {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--red);
+      margin-top: 0.2rem;
+    }
+
+    .menu-disclaimer {
+      margin-top: 2rem;
+      font-size: 0.8rem;
+      opacity: 0.6;
+      font-style: italic;
+    }
+
+    /* SECTION 6: HISTORIA */
+    #historia {
+      background: var(--black);
+      color: var(--off-white);
+      padding: 5rem 0;
+      overflow: hidden;
+    }
+
+    .marquee-wrap {
+      display: flex;
+      width: 100%;
+      overflow: hidden;
+      white-space: nowrap;
+      padding: 1.5rem 0;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .marquee-row {
+      display: flex;
+      flex-shrink: 0;
+      gap: 2.5rem;
+      will-change: transform;
+    }
+
+    .marquee-item {
+      font-family: var(--font-display);
+      font-size: clamp(2.6rem, 8vw, 5.5rem);
+      line-height: 1;
+      text-transform: uppercase;
+      color: transparent;
+      -webkit-text-stroke: 1px var(--cream);
+      letter-spacing: 0.05em;
+    }
+
+    .marquee-item.solid {
+      color: var(--red);
+      -webkit-text-stroke: 0px;
+    }
+
+    .historia-content {
+      max-width: 720px;
+      margin: 4rem auto 1rem;
+      padding: 0 1.5rem;
+      text-align: center;
+    }
+
+    .historia-p {
+      font-size: clamp(1.05rem, 2.2vw, 1.4rem);
+      line-height: 1.7;
+      opacity: 0.85;
+      color: var(--cream);
+    }
+
+    /* Store Interior Showcase Card */
+    .local-showcase-wrap {
+      max-width: 860px;
+      margin: 2.8rem auto 1.5rem;
+      padding: 0 1.2rem;
+    }
+
+    .local-showcase-frame {
+      position: relative;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.65);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      aspect-ratio: 16 / 11;
+      background: #1a1512;
+    }
+
+    .local-showcase-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 32%;
+      display: block;
+      transition: transform 0.6s ease;
+    }
+
+    .local-showcase-frame:hover .local-showcase-img {
+      transform: scale(1.025);
+    }
+
+    .local-showcase-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.35) 50%, rgba(10,9,8,0.92) 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: clamp(1.2rem, 3.5vw, 2.2rem);
+    }
+
+    .local-showcase-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      background: var(--red);
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.32rem 0.85rem;
+      border-radius: 9999px;
+      align-self: flex-start;
+      margin-bottom: 0.6rem;
+      box-shadow: 0 4px 12px rgba(226,35,26,0.4);
+    }
+
+    .local-showcase-pill span {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 6px #22c55e;
+      display: inline-block;
+    }
+
+    .local-showcase-title {
+      font-family: var(--font-display);
+      font-size: clamp(1.4rem, 3.5vw, 2.2rem);
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      color: #fff;
+      margin-bottom: 0.4rem;
+      line-height: 1.1;
+    }
+
+    .local-showcase-sub {
+      font-size: clamp(0.85rem, 1.8vw, 1.05rem);
+      color: var(--cream);
+      opacity: 0.9;
+      line-height: 1.5;
+      max-width: 58ch;
+    }
+
+    .local-showcase-hours {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      margin-top: 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--flame-gold);
+      text-transform: uppercase;
+    }
+
+    /* SECTION 7: UBICACION */
+    #ubicacion {
+      background: var(--cream);
+      color: #0a0908;
+      padding: 6rem clamp(1.2rem, 5vw, 4rem);
+    }
+
+    .ubicacion-header {
+      margin-bottom: 3.5rem;
+    }
+
+    .locales-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.8rem;
+    }
+
+    .local-card {
+      background: #fffaf0;
+      border-radius: 16px;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-top: 5px solid var(--red);
+      padding: 1.8rem 1.6rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .local-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.1);
+    }
+
+    .local-header-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+
+    .local-city {
+      font-family: var(--font-display);
+      font-size: 1.85rem;
+      line-height: 1.1;
+      text-transform: uppercase;
+      color: var(--char);
+    }
+
+    .local-badge {
+      background: rgba(226, 35, 26, 0.1);
+      color: var(--red);
+      font-size: 0.65rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.25rem 0.6rem;
+      border-radius: 9999px;
+      white-space: nowrap;
+    }
+
+    .local-live-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #15803d;
+      margin-bottom: 1rem;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 6px #22c55e;
+      display: inline-block;
+    }
+
+    .local-details {
+      font-size: 0.88rem;
+      line-height: 1.5;
+      color: rgba(10, 9, 8, 0.75);
+      margin-bottom: 1.4rem;
+      flex-grow: 1;
+    }
+
+    .local-details p {
+      margin-bottom: 0.4rem;
+    }
+
+    .local-phone-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-weight: 700;
+      color: var(--char);
+      font-size: 0.95rem;
+      margin-top: 0.4rem;
+    }
+
+    .local-card-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      margin-top: auto;
+    }
+
+    .btn-wa-local {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      background: #25d366;
+      color: #ffffff !important;
+      font-weight: 700;
+      font-size: 0.82rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+    }
+
+    .btn-wa-local:hover {
+      background: #1eb956;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 18px rgba(37, 211, 102, 0.4);
+    }
+
+    .btn-wa-local svg {
+      width: 17px;
+      height: 17px;
+      fill: currentColor;
+    }
+
+    .btn-map-local {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.55rem;
+      background: #ffffff;
+      color: #1a1a1a !important;
+      border: 1.5px solid rgba(0, 0, 0, 0.18);
+      font-weight: 700;
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.65rem 1rem;
+      border-radius: 10px;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .btn-map-local:hover {
+      border-color: #000000;
+      background: #f4ead9;
+      transform: translateY(-2px);
+    }
+
+    .btn-map-local svg {
+      width: 15px;
+      height: 15px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+    }
+
+    /* Floating WhatsApp Button & Modal */
+    .wa-floating-wrap {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      z-index: 950;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+
+    .wa-float-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.65rem;
+      background: #25d366;
+      color: #ffffff !important;
+      padding: 0.85rem 1.4rem;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      box-shadow: 0 10px 30px rgba(37, 211, 102, 0.45);
+      cursor: pointer;
+      border: none;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .wa-float-btn:hover {
+      background: #1eb956;
+      transform: scale(1.05);
+      box-shadow: 0 14px 38px rgba(37, 211, 102, 0.55);
+    }
+
+    .wa-float-btn svg {
+      width: 22px;
+      height: 22px;
+      fill: currentColor;
+    }
+
+    .wa-float-modal {
+      position: absolute;
+      bottom: calc(100% + 14px);
+      right: 0;
+      width: min(350px, 92vw);
+      background: #16120f;
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 18px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7);
+      padding: 1.3rem;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(12px) scale(0.96);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+    }
+
+    .wa-float-modal.is-open,
+    .wa-float-modal.open {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+
+    .wa-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      padding-bottom: 0.75rem;
+      margin-bottom: 0.9rem;
+    }
+
+    .wa-modal-title {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #fff;
+    }
+
+    .wa-modal-close {
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.6);
+      cursor: pointer;
+      font-size: 1.4rem;
+      line-height: 1;
+      padding: 0.2rem;
+    }
+
+    .wa-modal-close:hover {
+      color: #fff;
+    }
+
+    .wa-modal-sub {
+      font-size: 0.8rem;
+      opacity: 0.75;
+      margin-bottom: 0.9rem;
+    }
+
+    .wa-modal-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+    }
+
+    .wa-modal-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      color: #fff !important;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .wa-modal-item:hover {
+      background: rgba(37, 211, 102, 0.2);
+      border-color: #25d366;
+      transform: translateX(4px);
+    }
+
+    .wa-item-city {
+      font-weight: 800;
+      font-size: 0.92rem;
+      letter-spacing: 0.02em;
+    }
+
+    .wa-item-phone {
+      font-size: 0.76rem;
+      opacity: 0.7;
+    }
+
+    .wa-item-arrow {
+      color: #25d366;
+      font-size: 1.1rem;
+      font-weight: bold;
+    }
+
+    /* Form Select Dropdown */
+    .form-group select {
+      background: #221c18;
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 8px;
+      padding: 0.8rem 1rem;
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.2s ease;
+    }
+
+    .form-group select:focus {
+      border-color: var(--flame-orange);
+    }
+
+    .form-success-banner {
+      display: none;
+      background: rgba(37, 211, 102, 0.15);
+      border: 1px solid #25d366;
+      color: #fff;
+      padding: 1rem 1.2rem;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      line-height: 1.4;
+      margin-top: 0.8rem;
+    }
+
+    /* SECTION 8: CONTACTO */
+    #contacto {
+      background: var(--char-2);
+      color: var(--off-white);
+      padding: 6rem clamp(1.2rem, 5vw, 4rem);
+    }
+
+    .contacto-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .contacto-left-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.4rem, 5vw, 4rem);
+      line-height: 1;
+      text-transform: uppercase;
+      margin-bottom: 1.2rem;
+    }
+
+    .contacto-left-p {
+      font-size: 1.05rem;
+      line-height: 1.6;
+      opacity: 0.8;
+      margin-bottom: 2rem;
+    }
+
+    .social-btns {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .social-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.3);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s ease;
+      color: #fff;
+    }
+
+    .social-btn svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+    }
+
+    .social-btn:hover {
+      background: var(--red);
+      border-color: var(--red);
+      transform: translateY(-2px);
+    }
+
+    .contacto-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.6rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .form-group label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--flame-gold);
+    }
+
+    .form-group input,
+    .form-group textarea {
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid rgba(255,255,255,0.25);
+      padding: 0.6rem 0;
+      color: #fff;
+      font-family: var(--font-body);
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s ease;
+      resize: vertical;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      border-bottom-color: var(--flame-orange);
+    }
+
+    .btn-submit {
+      background: var(--red);
+      color: #fff;
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 4px;
+      cursor: pointer;
+      align-self: flex-start;
+      transition: background-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .btn-submit:hover {
+      background: var(--flame-gold);
+      color: #000;
+      transform: translateY(-2px);
+    }
+
+    /* FOOTER */
+    footer {
+      background: var(--black);
+      color: var(--off-white);
+      padding: 3.5rem 1.5rem;
+      text-align: center;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .footer-mark {
+      width: 48px;
+      height: auto;
+      opacity: 0.85;
+      margin-bottom: 0.5rem;
+    }
+
+    .footer-line-1 {
+      font-size: 0.85rem;
+      opacity: 0.7;
+    }
+
+    .footer-line-2 {
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--flame-orange);
+    }
+
+    /* RESPONSIVE BREAKPOINTS */
+    @media (max-width: 900px) {
+      .locales-grid {
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 1.4rem;
+      }
+      .contacto-grid {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      /* Header on mobile */
+      #siteHeader {
+        padding: 0.75rem 1rem;
+        background: rgba(10, 9, 8, 0.78);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+      }
+      #siteHeader.on-light {
+        background: rgba(244, 234, 217, 0.88);
+      }
+      .header-logo img {
+        height: 34px;
+      }
+      .header-wordmark {
+        font-size: 1.3rem;
+      }
+      .header-readout {
+        display: none !important;
+      }
+      .header-nav {
+        gap: 0.4rem;
+      }
+      .header-nav .header-cta:nth-child(2) {
+        display: none; /* Hide secondary link on small screens */
+      }
+      .header-cta {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.72rem;
+      }
+      .header-cta-wa {
+        padding: 0.4rem 0.85rem;
+        font-size: 0.72rem;
+        gap: 0.35rem;
+      }
+
+      /* Hero Section on mobile */
+      .hero-copy {
+        padding: 0 1.2rem;
+      }
+      .hero-badge-local {
+        font-size: 0.68rem;
+        padding: 0.28rem 0.75rem;
+        margin-bottom: 0.6rem;
+      }
+      .hero-logo-mark {
+        width: clamp(75px, 20vw, 110px);
+        margin-bottom: 0.75rem;
+      }
+      .hero-title {
+        font-size: clamp(2.6rem, 11vw, 4.5rem);
+      }
+      .hero-sub {
+        font-size: 0.8rem;
+        letter-spacing: 0.2em;
+        margin-top: 0.5rem;
+      }
+      .hero-tag {
+        font-size: 0.72rem;
+        letter-spacing: 0.08em;
+        line-height: 1.35;
+        margin-top: 0.4rem;
+        max-width: 320px;
+      }
+      .hero-actions {
+        flex-direction: column;
+        width: 100%;
+        max-width: 290px;
+        gap: 0.55rem;
+        margin-top: 1rem;
+        opacity: 1 !important;
+      }
+      .btn-hero-primary, .btn-hero-wa {
+        width: 100%;
+        justify-content: center;
+        padding: 0.7rem 1.2rem;
+        font-size: 0.8rem;
+        min-height: 44px;
+      }
+      .scroll-cue {
+        bottom: 1rem;
+      }
+
+      /* Plancha & Smash scenes */
+      .wipe-title {
+        font-size: clamp(2.2rem, 9vw, 4rem);
+        text-align: center;
+        padding: 0 1rem;
+      }
+      .scene-b-sub {
+        font-size: clamp(0.9rem, 3.5vw, 1.15rem);
+        text-align: center;
+        padding: 0 1rem;
+      }
+      .burger-layers-wrap {
+        width: min(280px, 85vw);
+        height: clamp(200px, 32vh, 280px);
+      }
+      .smash-title {
+        font-size: clamp(2.4rem, 10vw, 4.5rem);
+      }
+      .finale-title {
+        font-size: clamp(2.4rem, 10vw, 4.5rem);
+      }
+      .counter-row {
+        gap: 1.5rem;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .counter-block {
+        min-width: 120px;
+      }
+
+      /* Pinned Menu section on mobile */
+      #menuIntro {
+        padding: 4rem 1.2rem 2.5rem;
+      }
+      .menu-sticky-grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+        height: 100vh;
+        height: 100dvh;
+        gap: 0.4rem;
+        padding: 4.2rem 0.8rem 0.8rem;
+      }
+      .menu-sidebar {
+        position: relative;
+        top: 0;
+        left: 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        padding: 0 0.4rem;
+        z-index: 10;
+      }
+      .menu-index {
+        font-size: 1.8rem;
+        margin-bottom: 0;
+        line-height: 1;
+      }
+      .menu-progress-track {
+        width: 75px;
+        margin-bottom: 0;
+      }
+      .menu-hint {
+        display: none;
+      }
+      .menu-cards-stage {
+        height: 100%;
+        max-height: calc(100dvh - 120px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .m-card {
+        width: min(330px, 90vw);
+        max-height: calc(100dvh - 120px);
+        padding: 1rem 0.95rem;
+        border-radius: 14px;
+        overflow-y: auto;
+      }
+      .m-card-thumb {
+        height: clamp(110px, 20vh, 150px);
+        aspect-ratio: auto;
+        margin-bottom: 0.65rem;
+      }
+      .m-card-title {
+        font-size: 1.2rem;
+        margin-bottom: 0.25rem;
+      }
+      .m-card-desc {
+        font-size: 0.78rem;
+        line-height: 1.35;
+        margin-bottom: 0.45rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      .m-card-tags {
+        gap: 0.3rem;
+        margin-bottom: 0.6rem;
+      }
+      .m-card-tag {
+        font-size: 0.65rem;
+        padding: 0.2rem 0.45rem;
+      }
+      .m-card-price {
+        font-size: 1.15rem;
+      }
+      .m-card-btn-wa {
+        padding: 0.5rem 0.8rem;
+        font-size: 0.72rem;
+        gap: 0.35rem;
+      }
+
+      /* Extras section */
+      #menuExtras {
+        padding: 3.5rem 1.2rem;
+      }
+      .extras-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      /* Historia and Local Showcase */
+      #historia {
+        padding: 4rem 1.2rem 3rem;
+      }
+      .local-showcase-wrap {
+        padding: 0 0.5rem;
+        margin: 2rem auto 0.5rem;
+      }
+      .local-showcase-frame {
+        aspect-ratio: 4 / 3;
+        border-radius: 14px;
+      }
+
+      /* Ubicacion section */
+      #ubicacion {
+        padding: 4rem 1rem;
+      }
+      .ubicacion-header {
+        margin-bottom: 2rem;
+      }
+      .locales-grid {
+        grid-template-columns: 1fr;
+        gap: 1.2rem;
+      }
+      .local-card {
+        padding: 1.35rem 1.15rem;
+        border-radius: 14px;
+      }
+      .local-city {
+        font-size: 1.6rem;
+      }
+      .btn-wa-local, .btn-map-local {
+        min-height: 44px;
+        font-size: 0.8rem;
+      }
+
+      /* Contacto section */
+      #contacto {
+        padding: 4rem 1rem;
+      }
+      .btn-submit {
+        width: 100%;
+        text-align: center;
+        justify-content: center;
+        min-height: 48px;
+      }
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        font-size: 16px; /* Prevents iOS safari zoom on focus */
+      }
+
+      /* Floating WhatsApp on mobile */
+      .wa-floating-wrap {
+        bottom: 1rem;
+        right: 1rem;
+      }
+      .wa-float-btn {
+        padding: 0.7rem 1.15rem;
+        font-size: 0.78rem;
+        box-shadow: 0 8px 24px rgba(37, 211, 102, 0.45);
+      }
+      .wa-float-btn svg {
+        width: 20px;
+        height: 20px;
+      }
+      .wa-float-modal {
+        width: calc(100vw - 2rem);
+        max-width: 330px;
+        right: 0;
+        padding: 1rem;
+        border-radius: 16px;
+      }
+      .wa-modal-item {
+        padding: 0.65rem 0.85rem;
+      }
+      .wa-item-city {
+        font-size: 0.85rem;
+      }
+      .wa-item-phone {
+        font-size: 0.74rem;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .header-wordmark {
+        font-size: 1.15rem;
+      }
+      .header-logo img {
+        height: 30px;
+      }
+      .header-cta-wa span {
+        display: none; /* Just icon on very small screen */
+      }
+      .header-cta-wa {
+        padding: 0.45rem;
+        border-radius: 50%;
+      }
+      .hero-title {
+        font-size: 2.4rem;
+      }
+      .m-card {
+        width: 94vw;
+        padding: 0.85rem;
+      }
+    }
+
+    /* REDUCED MOTION */
+    @media (prefers-reduced-motion: reduce) {
+      .cue-line::after {
+        animation: none;
+      }
+      .hero-title .char,
+      .finale-title .char {
+        clip-path: none !important;
+        transform: none !important;
+      }
+      .hero-sub, .hero-tag, .scroll-cue, .finale-tag, .counter-row {
+        opacity: 1 !important;
+      }
+      .wipe-title {
+        clip-path: none !important;
+      }
+      .scene-b-sub, .smash-copy {
+        opacity: 1 !important;
+      }
+      .m-card:not(:first-child) {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Film Grain Overlay -->
+  <div id="grain"></div>
+
+  <!-- Adaptive Fixed Header -->
+  <header id="siteHeader">
+    <a href="#" class="header-logo" aria-label="TAITASHU Inicio">
+      <img src="./assets/taitashu-logo.png" alt="TAITASHU Logo" />
+      <div class="header-wordmark">TAITA<span>SHU</span></div>
+    </a>
+
+    <div class="header-readout">
+      <div class="chapter-label" id="chapterLabel">IGNICIÓN</div>
+      <div class="progress-track">
+        <div class="progress-fill" id="headerProgressFill"></div>
+      </div>
+      <div class="heat-gauge" id="heatGauge">180°</div>
+    </div>
+
+    <nav class="header-nav">
+      <a href="#menu" class="header-cta">Menú</a>
+      <a href="#ubicacion" class="header-cta">5 Locales</a>
+      <a href="https://wa.me/595994223094?text=Hola%20Taitashu%2C%20quiero%20hacer%20un%20pedido" target="_blank" rel="noopener noreferrer" class="header-cta-wa" aria-label="Pedir por WhatsApp">
+        <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+        WhatsApp
+      </a>
+    </nav>
+  </header>
+
+  <!-- Pinned Scenes Container -->
+  <div id="filmScroll">
+    <!-- SECTION 1: Scene A Ignición -->
+    <section class="scene" id="sceneA" data-header="dark">
+      <div class="scene-photo" id="photoA"></div>
+      <div class="scene-photo-scrim scrim-a"></div>
+      <canvas id="embers"></canvas>
+      <div class="embers-dom" id="embersDom"></div>
+
+      <div class="hero-copy">
+        <div class="hero-badge-local"><span></span> Local Luque • TAITASHU</div>
+        <img src="./assets/taitashu-logo.png" alt="TAITASHU" class="hero-logo-mark" />
+        <h1 class="hero-title" id="heroTitle">TAITASHU</h1>
+        <div class="hero-sub">Burgers al fuego</div>
+        <div class="hero-tag">Smash • Doubles • Big Smash — 5 Sucursales: Asunción, Lambaré, Fernando, Mariano y Luque</div>
+        <div class="hero-actions" id="heroActions">
+          <a href="#menu" class="btn-hero-primary">Ver Menú</a>
+          <a href="#ubicacion" class="btn-hero-primary" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); box-shadow: none;">5 Locales</a>
+          <a href="https://wa.me/595994223094?text=Hola%20Taitashu%2C%20quiero%20hacer%20un%20pedido" target="_blank" rel="noopener noreferrer" class="btn-hero-wa">
+            <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+            Pedir por WhatsApp
+          </a>
+        </div>
+      </div>
+
+      <div class="scroll-cue">
+        <span class="cue-label">Bajá</span>
+        <div class="cue-line"></div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: Scene B Plancha -->
+    <section class="scene" id="sceneB" data-header="dark">
+      <div class="scene-photo" id="photoB"></div>
+      <div class="scene-photo-scrim scrim-b"></div>
+      <div class="heat-blob heat-blob-1" id="heatBlob1"></div>
+      <div class="heat-blob heat-blob-2" id="heatBlob2"></div>
+      <div class="smoke-panel smoke-panel-left" id="smokeLeft"></div>
+      <div class="smoke-panel smoke-panel-right" id="smokeRight"></div>
+
+      <div class="scene-b-copy">
+        <h2 class="wipe-title" id="wipeTitle">SIN VUELTA ATRÁS</h2>
+        <p class="scene-b-sub" id="sceneBSub">Carne fresca, plancha a máxima temperatura</p>
+      </div>
+    </section>
+
+    <!-- SECTION 3: Scene C Smash -->
+    <section class="scene" id="sceneC" data-header="dark">
+      <div class="scene-photo" id="photoC"></div>
+      <div class="scene-photo-scrim scrim-c"></div>
+      <div class="sear-flash" id="searFlash"></div>
+      <div class="spatula-line" id="spatulaLine"></div>
+
+      <div class="burger-layers-wrap" id="burgerLayers">
+        <div class="layer layer-crown" title="Pan Tostado Corona"></div>
+        <div class="layer layer-cheese" title="Queso Cheddar Fundido"></div>
+        <div class="layer layer-patty" title="Carne Smash Caramelizada"></div>
+        <div class="layer layer-bacon" title="Panceta Crocante"></div>
+        <div class="layer layer-base" title="Pan Tostado Base"></div>
+      </div>
+
+      <div class="griddle-floor"></div>
+
+      <div class="smash-copy" id="smashCopy">
+        <div class="smash-label">Aplastado al momento</div>
+        <h3 class="smash-heading">Doble carne, doble sabor</h3>
+      </div>
+    </section>
+
+    <!-- SECTION 4: Scene D Servido -->
+    <section class="scene" id="sceneD" data-header="dark">
+      <div class="scene-photo" id="photoD"></div>
+      <div class="scene-photo-scrim scrim-d"></div>
+
+      <div class="scene-d-copy">
+        <h2 class="finale-title" id="finaleTitle">TAITASHU</h2>
+        <div class="finale-tag" id="finaleTag">Hecho al fuego, servido al toque</div>
+        <div class="counter-row" id="counterRow">
+          <span class="counter-label">Pedido</span>
+          <span class="counter-val" id="orderCounter">000</span>
+        </div>
+      </div>
+
+      <div class="seam-fade" id="seamFade"></div>
+    </section>
+  </div>
+
+  <!-- Main Content -->
+  <main>
+    <!-- SECTION 5: Menú -->
+    <section id="menu" data-header="light">
+      <div class="menu-header">
+        <div class="menu-eyebrow">Al fuego, sin apuro</div>
+        <h2 class="menu-heading">El menú</h2>
+        <p class="menu-intro">Smash burgers hechas al momento. Todas las Doubles y Big Smash incluyen papas y gaseosa.</p>
+      </div>
+
+      <div id="menuPin">
+        <div class="menu-sticky-grid">
+          <!-- Sidebar -->
+          <div class="menu-sidebar">
+            <div class="menu-index" id="menuIndexDisplay">01<span>/ 08</span></div>
+            <div class="menu-progress-track">
+              <div class="menu-progress-fill" id="menuProgressFill"></div>
+            </div>
+            <div class="menu-hint">Seguí bajando</div>
+          </div>
+
+          <!-- 8 Stacked Cards -->
+          <div class="menu-cards-stage" id="menuCardsStage">
+            <!-- 1. BBQ -->
+            <div class="m-card" data-idx="0">
+              <div class="m-card-thumb">
+                <span class="m-card-badge">Doubles</span>
+                <img src="./assets/menu-bbq.jpg" alt="Burger BBQ HD" loading="lazy" />
+              </div>
+              <h3 class="m-card-title">BBQ</h3>
+              <div class="m-card-tags">
+                <span class="m-tag">Pan brioche</span>
+                <span class="m-tag">Doble carne</span>
+                <span class="m-tag">Cheddar-panceta</span>
+                <span class="m-tag">Salsa BBQ</span>
+              </div>
+              <p class="m-card-desc">Pan brioche tostado al fuego, doble medallón smash con costra caramelizada, abundante cheddar fundido, panceta ahumada crujiente y salsa BBQ especial de la casa.</p>
+              <div class="m-card-pricing">
+                <div>
+                  <div class="m-price-main">50.000 Gs</div>
+                  <div class="m-price-note">incluye papas y gaseosa</div>
+                </div>
+                <div class="m-price-huerfano">Huérfano 35.000 Gs</div>
+              </div>
+              <a href="https://wa.me/595994223094?text=Hola%20Taitashu%2C%20quiero%20pedir%20la%20Burger%20BBQ" target="_blank" rel="noopener noreferrer" class="m-card-btn-wa">
+                <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+                Pedir BBQ por WhatsApp
+              </a>
+            </div>
+
+            <!-- 2. Trouble -->
+            <div class="m-card" data-idx="1">
+              <div class="m-card-thumb">
+                <span class="m-card-badge">Doubles</span>
+                <img src="./assets/menu-trouble.jpg" alt="Burger Trouble HD" loading="lazy" />
+              </div>
+              <h3 class="m-card-title">Trouble</h3>
+              <div class="m-card-tags">
+                <span class="m-tag">Pan suave</span>
+                <span class="m-tag">Doble smash</span>
+                <span class="m-tag">Salsa Trouble</span>
+                <span class="m-tag">Cheddar fundido</span>
+              </div>
+              <p class="m-card-desc">Pan suave mantecoso tostado a fuego vivo, doble medallón smash crocante, exclusiva salsa Trouble de la casa con toque ahumado y cheddar fundido.</p>
+              <div class="m-card-pricing">
+                <div>
+                  <div class="m-price-main">50.000 Gs</div>
+                  <div class="m-price-note">incluye papas y gaseosa</div>
+                </div>
+                <div class="m-price-huerfano">Huérfano 35.000 Gs</div>
+              </div>
+              <a href="https://wa.me/595994223094?text=Hola%20Taitashu%2C%20quiero%20pedir%20la%20Burger%20Trouble" target="_blank" rel="noopener noreferrer" class="m-card-btn-wa">
+                <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+                Pedir Trouble por WhatsApp
+              </a>
+            </div>
+
+            <!-- 3. Honey -->
+            <div class="m-card" data-idx="2">
+              <div class="m-card-thumb">
+                <span class="m-card-badge">Doubles</span>
+                <img src="./assets/menu-honey.jpg" alt="Burger Honey HD" loading="lazy" />
+              </div>
+              <h3 class="m-card-title">Honey</h3>
+              <div class="m-card-tags">
+                <span class="m-tag">Pan brioche</span>
+                <span class="m-tag">Doble carne</span>
+                <span class="m-tag">Cheddar-pepinillos</span>
+                <span class="m-tag">Honey mustard-lechuga</span>
+              </div>
+              <p class="m-card-desc">Pan tostado al fuego, doble medallón smash, cheddar cremoso, rodajas de pepinillos agridulces, salsa honey mustard y lechuga fresca crocante.</p>
+              <div class="m-card-pricing">
+                <div>
+                  <div class="m-price-main">50.000 Gs</div>
+                  <div class="m-price-note">incluye papas y gaseosa</div>
+                </div>
+                <div class="m-price-huerfano">Huérfano 35.000 Gs</div>
+              </div>
+              <a href="https://wa.me/595994223094?text=Hola%20Taitashu%2C%20quiero%20pedir%20la%20Burger%20Honey" target="_blank" rel="noopener noreferrer" class="m-card-btn-wa">
+                <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+                Pedir Honey por WhatsApp
+              </a>
+            </div>
+
+            <!-- 4. Crispy -->
+            <div class="m-card" data-idx="3">
+              <div class="m-card-thumb">
+                <span class="m-card-badge">Doubles</span>
+                <img src="./assets/menu-crispy.jpg" alt="Burger Crispy HD" loading="lazy" />
+              </div>
+              <h3 class="m-card-title">Crispy</h3>
+              <div class="m-card-tags">
+                <span class="m-tag">Pan tostado</span>
+                <span class="m-tag">Doble carne</span>
+                <span class="m-tag">Cheddar</span>
+                <span class="m-tag">Cebolla crispy</span>
+              </div>
+              <p class="m-card-desc">Pan suave tostado al fuego, doble medallón smash 100% vacuna con costra crujiente, doble cheddar y lluvia crocante de cebolla crispy dorada.</p>
+              <div class="m-card-pricing">
+                <div>
+                  <div class="m-price-main">50.000 Gs</div>
+                  <div class="m-price-note">incluye papas y gaseosa</div>
+                </div>
+                <div class="m-price-huerfano">Huérfano 35.000 Gs</div>
+              </div>
+              <a href="https://wa.me/595994223094?text=Hola%20Taitashu%2C%20quiero%20pedir%20la%20Burger%20Crispy" target="_blank" rel="noopener noreferrer" class="m-card-btn-wa">
+                <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+                Pedir Crispy por WhatsApp
+              </a>
+            </div>
+
+            <!-- 5. Quintuplex -->
+            <div class="m-card" data-idx="4">
+              <div class="m-card-thumb">
+                <span class="m-card-badge">Big Smash</span>
+                <img src="./assets/menu-quintuplex.jpg" alt="Burger Quintuplex HD" loading="lazy" />
+              </div>
+              <h3 class="m-card-title">Quintuplex</h3>
+              <div class="m-card-tags">
+                <span class="m-tag">Pan brioche</span>
+                <span class="m-tag">x5 Carnes smash</span>
+                <span class="m-tag">x10 Cheddar</span>
+              </div>
+              <p class="m-card-desc">El monstruo de la plancha: pan tostado, x5 carnes smash con costra caramelizada perfecta y x10 fetas de cheddar derretido entre cada piso.</p>
+              <div class="m-card-pricing">
+                <div>
+                  <div class="m-price-main">75.000 Gs</div>
+                  <div class="m-price-note">incluye papas y gaseosa</div>
+                </div>
+                <div class="m-price-huerfano">Huérfano 60.000 Gs</div>
+              </div>
+              <a href="https://wa.me/595994223094?text=Hola%20Taitashu%2C%20quiero%20pedir%20la%20Burger%20Quintuplex" target="_blank" rel="noopener noreferrer" class="m-card-btn-wa">
+                <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+                Pedir Quintuplex por WhatsApp
+              </a>
+            </div>
+
+            <!-- 6. Dobletón -->
+            <div class="m-card" data-idx="5">
+              <div class="m-card-thumb">
+                <span class="m-card-badge">Big Smash</span>
+                <img src="./assets/menu-dobleton.jpg" alt="Burger Dobletón HD" loading="lazy" />
+              </div>
+              <h3 class="m-card-title">Dobletón</h3>
+              <div class="m-card-tags">
+                <span class="m-tag">Una Criolla x2</span>
+                <span class="m-tag">Más panceta</span>
+                <span class="m-tag">Doble huevo</span>
+                <span class="m-tag">Doble smash</span>
+              </div>
+              <p class="m-card-desc">Una criolla multiplicada x2 con más panceta: doble carne smash al hierro, doble huevo frito a la plancha, panceta crocante, cheddar, cebolla morada fresca, tomate y lechuga.</p>
+              <div class="m-card-pricing">
+                <div>
+                  <div class="m-price-main">65.000 Gs</div>
+                  <div class="m-price-note">incluye papas y gaseosa</div>
+                </div>
+                <div class="m-price-huerfano">Huérfano 50.000 Gs</div>
+              </div>
+              <a href="https://wa.me/595994223094?text=Hola%20Taitashu%2C%20quiero%20pedir%20la%20Burger%20Doblet%C3%B3n" target="_blank" rel="noopener noreferrer" class="m-card-btn-wa">
+                <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+                Pedir Dobletón por WhatsApp
+              </a>
+            </div>
+
+            <!-- 7. X-treme -->
+            <div class="m-card" data-idx="6">
+              <div class="m-card-thumb">
+                <span class="m-card-badge">Big Smash</span>
+                <img src="./assets/menu-xtreme.jpg" alt="Burger X-treme HD" loading="lazy" />
+              </div>
+              <h3 class="m-card-title">X-treme</h3>
+              <div class="m-card-tags">
+                <span class="m-tag">Pan brioche</span>
+                <span class="m-tag">Triple carne</span>
+                <span class="m-tag">Cheddar-panceta</span>
+                <span class="m-tag">Cebolla morada-bbq</span>
+              </div>
+              <p class="m-card-desc">Pan brioche tostado, 3 medallones smash crujientes con costra Maillard, queso cheddar en cascada, panceta ahumada crocante, cebolla morada y salsa BBQ.</p>
+              <div class="m-card-pricing">
+                <div>
+                  <div class="m-price-main">65.000 Gs</div>
+                  <div class="m-price-note">incluye papas y gaseosa</div>
+                </div>
+                <div class="m-price-huerfano">Huérfano 50.000 Gs</div>
+              </div>
+              <a href="https://wa.me/595994223094?text=Hola%20Taitashu%2C%20quiero%20pedir%20la%20Burger%20X-treme" target="_blank" rel="noopener noreferrer" class="m-card-btn-wa">
+                <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+                Pedir X-treme por WhatsApp
+              </a>
+            </div>
+
+            <!-- 8. Criolla -->
+            <div class="m-card" data-idx="7">
+              <div class="m-card-thumb">
+                <span class="m-card-badge">Big Smash</span>
+                <img src="./assets/menu-criolla.jpg" alt="Burger Criolla HD" loading="lazy" />
+              </div>
+              <h3 class="m-card-title">Criolla</h3>
+              <div class="m-card-tags">
+                <span class="m-tag">Pan-carne-huevo</span>
+                <span class="m-tag">Cheddar</span>
+                <span class="m-tag">Cebolla morada</span>
+                <span class="m-tag">Lechuga y tomate</span>
+              </div>
+              <p class="m-card-desc">Pan tostado al hierro, carne smash con bordes crocantes, huevo frito a la plancha, cheddar derretido, cebolla morada fresca, lechuga y rodajas de tomate.</p>
+              <div class="m-card-pricing">
+                <div>
+                  <div class="m-price-main">45.000 Gs</div>
+                  <div class="m-price-note">incluye papas y gaseosa</div>
+                </div>
+                <div class="m-price-huerfano">Huérfano 30.000 Gs</div>
+              </div>
+              <a href="https://wa.me/595994223094?text=Hola%20Taitashu%2C%20quiero%20pedir%20la%20Burger%20Criolla" target="_blank" rel="noopener noreferrer" class="m-card-btn-wa">
+                <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+                Pedir Criolla por WhatsApp
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Static Extras Strip -->
+      <div class="extras-strip">
+        <h3 class="extras-title">Extras para acompañar</h3>
+        <div class="extras-grid">
+          <div class="extra-card">
+            <img src="./assets/extra-papas.jpg" alt="Papas con cheddar y bacon HD" class="extra-thumb" loading="lazy" />
+            <div style="flex-grow: 1;">
+              <div class="extra-info-name">Papas con cheddar y bacon</div>
+              <p style="font-size: 0.8rem; opacity: 0.75; margin: 0.2rem 0 0.4rem;">Papas fritas en bandeja con salsa de queso cheddar fundido y lluvia de bacon crocante.</p>
+              <div class="extra-info-price">35.000 Gs</div>
+            </div>
+            <a href="https://wa.me/595994223094?text=Hola%20Taitashu%2C%20quiero%20pedir%20Papas%20con%20Cheddar%20y%20Bacon" target="_blank" rel="noopener noreferrer" class="social-btn" style="background:#25d366; border-color:#25d366; flex-shrink:0;" aria-label="Pedir Papas por WhatsApp">
+              <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+            </a>
+          </div>
+          <div class="extra-card">
+            <img src="./assets/extra-mac.jpg" alt="Mc&Cheese HD" class="extra-thumb" loading="lazy" />
+            <div style="flex-grow: 1;">
+              <div class="extra-info-name">Mc&Cheese</div>
+              <p style="font-size: 0.8rem; opacity: 0.75; margin: 0.2rem 0 0.4rem;">Macarrones al molde bañados en cremosa y espesa salsa de queso cheddar horneados.</p>
+              <div class="extra-info-price">26.000 Gs</div>
+            </div>
+            <a href="https://wa.me/595994223094?text=Hola%20Taitashu%2C%20quiero%20pedir%20Mc%26Cheese" target="_blank" rel="noopener noreferrer" class="social-btn" style="background:#25d366; border-color:#25d366; flex-shrink:0;" aria-label="Pedir Mac&Cheese por WhatsApp">
+              <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+            </a>
+          </div>
+        </div>
+        <p class="menu-disclaimer">Precios válidos para salón, take away y delivery directo en todas nuestras sucursales.</p>
+      </div>
+    </section>
+
+    <!-- SECTION 6: Historia -->
+    <section id="historia" data-header="dark">
+      <div class="marquee-wrap">
+        <div class="marquee-row" id="marqueeRow1">
+          <span class="marquee-item">FUEGO</span>
+          <span class="marquee-item solid">TAITASHU</span>
+          <span class="marquee-item">SMASH</span>
+          <span class="marquee-item">AL TOQUE</span>
+          <span class="marquee-item solid">TAITASHU</span>
+          <span class="marquee-item">FUEGO</span>
+          <span class="marquee-item solid">TAITASHU</span>
+          <span class="marquee-item">SMASH</span>
+          <span class="marquee-item">AL TOQUE</span>
+          <span class="marquee-item solid">TAITASHU</span>
+        </div>
+        <div class="marquee-row" aria-hidden="true" id="marqueeRow2">
+          <span class="marquee-item">FUEGO</span>
+          <span class="marquee-item solid">TAITASHU</span>
+          <span class="marquee-item">SMASH</span>
+          <span class="marquee-item">AL TOQUE</span>
+          <span class="marquee-item solid">TAITASHU</span>
+          <span class="marquee-item">FUEGO</span>
+          <span class="marquee-item solid">TAITASHU</span>
+          <span class="marquee-item">SMASH</span>
+          <span class="marquee-item">AL TOQUE</span>
+          <span class="marquee-item solid">TAITASHU</span>
+        </div>
+      </div>
+
+      <div class="historia-content">
+        <p class="historia-p">
+          TAITASHU arrancó como un unipersonal de barrio en diciembre de 2017, con una plancha, dos manos y ganas de hacer la mejor smash burger de la cuadra. Seguimos igual: carne de verdad, pan tostado, queso que gotea, y todo hecho al momento en que lo pedís.
+        </p>
+      </div>
+
+      <!-- Real Store Interior Showcase Card -->
+      <div class="local-showcase-wrap">
+        <div class="local-showcase-frame">
+          <img src="./assets/local-taitashu.jpg" alt="Interior real del local TAITASHU Luque" loading="lazy" class="local-showcase-img" />
+          <div class="local-showcase-overlay">
+            <span class="local-showcase-pill"><span></span> Sucursal Luque • TAITASHU</span>
+            <h3 class="local-showcase-title">Mesas de barrio, faroles y fuego real</h3>
+            <p class="local-showcase-sub">Vení a disfrutar el auténtico ambiente de TAITASHU con banquetas de cuero burdeos, ladrillos a la vista y el aroma de la plancha al rojo vivo.</p>
+            <div class="local-showcase-hours">
+              <span style="width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 6px #22c55e;display:inline-block;"></span> Abierto Lunes a Domingos • 19:30 a 00:30 hs.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 7: 5 Locales Oficiales -->
+    <section id="ubicacion" data-header="light">
+      <div class="ubicacion-header">
+        <div class="menu-eyebrow">Red de fuegos en Gran Asunción</div>
+        <h2 class="menu-heading">Nuestras 5 Sucursales</h2>
+        <div style="display: inline-flex; align-items: center; gap: 0.55rem; background: rgba(226,35,26,0.1); color: var(--red); font-weight: 700; font-size: clamp(0.78rem, 1.8vw, 0.92rem); padding: 0.4rem 0.95rem; border-radius: 9999px; margin-top: 0.6rem; border: 1px solid rgba(226,35,26,0.2);">
+          <span style="width: 8px; height: 8px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 6px #22c55e; display: inline-block;"></span>
+          Horario general: Lunes a Domingos de 19:30 a 00:30 hs.
+        </div>
+        <p style="font-size: 1.05rem; opacity: 0.8; max-width: 680px; margin-top: 0.8rem;">
+          Elegí tu sucursal más cercana para pasar a retirar, comer en el local o pedir delivery directo con atención inmediata por WhatsApp.
+        </p>
+      </div>
+
+      <div class="locales-grid">
+        <!-- 1. Asunción -->
+        <div class="local-card">
+          <div>
+            <div class="local-header-row">
+              <h3 class="local-city">Asunción</h3>
+              <span class="local-badge">Casa Central</span>
+            </div>
+            <div class="local-live-status">
+              <span class="status-dot"></span> Planchas activas • Abierto
+            </div>
+            <div class="local-details">
+              <p><strong>Ubicación:</strong> Asunción, Paraguay</p>
+              <p><strong>Horario:</strong> Lunes a Domingos de 19:30 a 00:30 hs.</p>
+              <div class="local-phone-tag">
+                <span>WhatsApp:</span> +595 994 223094
+              </div>
+            </div>
+          </div>
+          <div class="local-card-actions">
+            <a href="https://wa.me/595994223094?text=Hola%20Taitashu%20Asunci%C3%B3n%2C%20quiero%20hacer%20un%20pedido" target="_blank" rel="noopener noreferrer" class="btn-wa-local">
+              <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+              Pedir a Asunción
+            </a>
+            <a href="https://maps.app.goo.gl/3MHBhCGdYft3kiEQA" target="_blank" rel="noopener noreferrer" class="btn-map-local">
+              <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+              Ver en Google Maps
+            </a>
+          </div>
+        </div>
+
+        <!-- 2. Lambaré -->
+        <div class="local-card">
+          <div>
+            <div class="local-header-row">
+              <h3 class="local-city">Lambaré</h3>
+              <span class="local-badge">Sucursal</span>
+            </div>
+            <div class="local-live-status">
+              <span class="status-dot"></span> Planchas activas • Abierto
+            </div>
+            <div class="local-details">
+              <p><strong>Ubicación:</strong> Lambaré, Gran Asunción</p>
+              <p><strong>Horario:</strong> Lunes a Domingos de 19:30 a 00:30 hs.</p>
+              <div class="local-phone-tag">
+                <span>WhatsApp:</span> +595 991 714020
+              </div>
+            </div>
+          </div>
+          <div class="local-card-actions">
+            <a href="https://wa.me/595991714020?text=Hola%20Taitashu%20Lambar%C3%A9%2C%20quiero%20hacer%20un%20pedido" target="_blank" rel="noopener noreferrer" class="btn-wa-local">
+              <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+              Pedir a Lambaré
+            </a>
+            <a href="https://maps.app.goo.gl/gndBMVcNt1uXhii96" target="_blank" rel="noopener noreferrer" class="btn-map-local">
+              <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+              Ver en Google Maps
+            </a>
+          </div>
+        </div>
+
+        <!-- 3. Luque -->
+        <div class="local-card">
+          <div>
+            <div class="local-header-row">
+              <h3 class="local-city">Luque</h3>
+              <span class="local-badge">Sucursal</span>
+            </div>
+            <div class="local-live-status">
+              <span class="status-dot"></span> Planchas activas • Abierto
+            </div>
+            <div class="local-details">
+              <p><strong>Ubicación:</strong> Luque, Gran Asunción</p>
+              <p><strong>Horario:</strong> Lunes a Domingos de 19:30 a 00:30 hs.</p>
+              <div class="local-phone-tag">
+                <span>WhatsApp:</span> +595 981 244799
+              </div>
+            </div>
+          </div>
+          <div class="local-card-actions">
+            <a href="https://wa.me/595981244799?text=Hola%20Taitashu%20Luque%2C%20quiero%20hacer%20un%20pedido" target="_blank" rel="noopener noreferrer" class="btn-wa-local">
+              <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+              Pedir a Luque
+            </a>
+            <a href="https://maps.app.goo.gl/pEbfSwWV1CERnyMc7" target="_blank" rel="noopener noreferrer" class="btn-map-local">
+              <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+              Ver en Google Maps
+            </a>
+          </div>
+        </div>
+
+        <!-- 4. Fernando de la Mora -->
+        <div class="local-card">
+          <div>
+            <div class="local-header-row">
+              <h3 class="local-city">FDO de la Mora</h3>
+              <span class="local-badge">Sucursal</span>
+            </div>
+            <div class="local-live-status">
+              <span class="status-dot"></span> Planchas activas • Abierto
+            </div>
+            <div class="local-details">
+              <p><strong>Ubicación:</strong> Fernando de la Mora, Gran Asunción</p>
+              <p><strong>Horario:</strong> Lunes a Domingos de 19:30 a 00:30 hs.</p>
+              <div class="local-phone-tag">
+                <span>WhatsApp:</span> +595 984 105405
+              </div>
+            </div>
+          </div>
+          <div class="local-card-actions">
+            <a href="https://wa.me/595984105405?text=Hola%20Taitashu%20Fernando%20de%20la%20Mora%2C%20quiero%20hacer%20un%20pedido" target="_blank" rel="noopener noreferrer" class="btn-wa-local">
+              <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+              Pedir a FDO de la Mora
+            </a>
+            <a href="https://maps.app.goo.gl/143HXAJxzTVbmpgY9" target="_blank" rel="noopener noreferrer" class="btn-map-local">
+              <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+              Ver en Google Maps
+            </a>
+          </div>
+        </div>
+
+        <!-- 5. Mariano Roque Alonso -->
+        <div class="local-card">
+          <div>
+            <div class="local-header-row">
+              <h3 class="local-city">Mariano</h3>
+              <span class="local-badge">Sucursal</span>
+            </div>
+            <div class="local-live-status">
+              <span class="status-dot"></span> Planchas activas • Abierto
+            </div>
+            <div class="local-details">
+              <p><strong>Ubicación:</strong> Mariano Roque Alonso, Gran Asunción</p>
+              <p><strong>Horario:</strong> Lunes a Domingos de 19:30 a 00:30 hs.</p>
+              <div class="local-phone-tag">
+                <span>WhatsApp:</span> +595 981 105681
+              </div>
+            </div>
+          </div>
+          <div class="local-card-actions">
+            <a href="https://wa.me/595981105681?text=Hola%20Taitashu%20Mariano%2C%20quiero%20hacer%20un%20pedido" target="_blank" rel="noopener noreferrer" class="btn-wa-local">
+              <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+              Pedir a Mariano
+            </a>
+            <a href="https://maps.app.goo.gl/wgYQeAp51zj89qEC7" target="_blank" rel="noopener noreferrer" class="btn-map-local">
+              <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+              Ver en Google Maps
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 8: Contacto Directo -->
+    <section id="contacto" data-header="dark">
+      <div class="contacto-grid">
+        <div>
+          <h2 class="contacto-left-title">Pedí directo por WhatsApp</h2>
+          <p class="contacto-left-p">
+            Seleccioná tu sucursal más cercana para que tu pedido entre a la plancha de inmediato. Delivery y Take Away en minutos.
+          </p>
+
+          <div style="margin-bottom: 2rem;">
+            <p style="font-size: 0.85rem; color: var(--flame-gold); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.8rem;">
+              Canales directos de cada sucursal:
+            </p>
+            <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 0.45rem; font-size: 0.9rem;">
+              <li><strong>Asunción:</strong> <a href="https://wa.me/595994223094" target="_blank" style="color:#25d366; text-decoration: underline;">+595 994 223094</a></li>
+              <li><strong>Lambaré:</strong> <a href="https://wa.me/595991714020" target="_blank" style="color:#25d366; text-decoration: underline;">+595 991 714020</a></li>
+              <li><strong>Luque:</strong> <a href="https://wa.me/595981244799" target="_blank" style="color:#25d366; text-decoration: underline;">+595 981 244799</a></li>
+              <li><strong>FDO de la Mora:</strong> <a href="https://wa.me/595984105405" target="_blank" style="color:#25d366; text-decoration: underline;">+595 984 105405</a></li>
+              <li><strong>Mariano:</strong> <a href="https://wa.me/595981105681" target="_blank" style="color:#25d366; text-decoration: underline;">+595 981 105681</a></li>
+            </ul>
+          </div>
+
+          <div class="social-btns">
+            <!-- Instagram -->
+            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="social-btn" aria-label="Instagram">
+              <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+            </a>
+            <!-- TikTok -->
+            <a href="https://tiktok.com" target="_blank" rel="noopener noreferrer" class="social-btn" aria-label="TikTok">
+              <svg viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64c.298-.002.595.042.88.13V9.4a6.33 6.33 0 0 0-1-.08A6.34 6.34 0 0 0 3 15.66a6.34 6.34 0 0 0 10.82 4.5 6.3 6.3 0 0 0 1.86-4.49V8.65a8.28 8.28 0 0 0 4.91 1.54V6.75a4.8 4.8 0 0 1-1-.06z"/></svg>
+            </a>
+            <!-- WhatsApp Central -->
+            <a href="https://wa.me/595994223094?text=Hola%20Taitashu%2C%20quiero%20hacer%20un%20pedido" target="_blank" rel="noopener noreferrer" class="social-btn" style="background:#25d366; border-color:#25d366;" aria-label="WhatsApp Asunción">
+              <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <form class="contacto-form" id="pedidoForm">
+          <div class="form-group">
+            <label for="localSelect">Seleccioná tu Sucursal</label>
+            <select id="localSelect" required>
+              <option value="595994223094">Asunción (+595 994 223094)</option>
+              <option value="595991714020">Lambaré (+595 991 714020)</option>
+              <option value="595981244799">Luque (+595 981 244799)</option>
+              <option value="595984105405">FDO de la Mora (+595 984 105405)</option>
+              <option value="595981105681">Mariano Roque Alonso (+595 981 105681)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="nombreInput">Tu Nombre</label>
+            <input type="text" id="nombreInput" required placeholder="Ej: Rodrigo Benítez" />
+          </div>
+          <div class="form-group">
+            <label for="telInput">Tu Teléfono / WhatsApp</label>
+            <input type="tel" id="telInput" required placeholder="+595 981 000 000" />
+          </div>
+          <div class="form-group">
+            <label for="msgInput">¿Qué vas a pedir hoy?</label>
+            <textarea id="msgInput" rows="3" placeholder="Ej: 2 Dobletón con papas + 1 BBQ huérfana para delivery en..."></textarea>
+          </div>
+          <button type="submit" class="btn-submit" style="background: #25d366; display: inline-flex; align-items: center; gap: 0.6rem;">
+            <svg style="width: 18px; height: 18px; fill: currentColor;" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+            Enviar Pedido a WhatsApp
+          </button>
+          <div class="form-success-banner" id="formSuccessBanner">
+            Redirigiendo a WhatsApp de la sucursal... ¡Buen provecho!
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- Floating WhatsApp Widget & Branch Selector Modal -->
+    <div class="wa-floating-wrap">
+      <div class="wa-float-modal" id="waFloatModal">
+        <div class="wa-modal-header">
+          <div class="wa-modal-title">Elegí tu Sucursal</div>
+          <button class="wa-modal-close" id="waModalClose" aria-label="Cerrar modal">&times;</button>
+        </div>
+        <p class="wa-modal-sub">Tocá para chatear y pedir al instante por WhatsApp:</p>
+        <div class="wa-modal-list">
+          <a href="https://wa.me/595994223094?text=Hola%20Taitashu%20Asunci%C3%B3n%2C%20quiero%20hacer%20un%20pedido" target="_blank" rel="noopener noreferrer" class="wa-modal-item">
+            <div>
+              <div class="wa-item-city">Asunción (Central)</div>
+              <div class="wa-item-phone">+595 994 223094</div>
+            </div>
+            <span class="wa-item-arrow">&rarr;</span>
+          </a>
+          <a href="https://wa.me/595991714020?text=Hola%20Taitashu%20Lambar%C3%A9%2C%20quiero%20hacer%20un%20pedido" target="_blank" rel="noopener noreferrer" class="wa-modal-item">
+            <div>
+              <div class="wa-item-city">Lambaré</div>
+              <div class="wa-item-phone">+595 991 714020</div>
+            </div>
+            <span class="wa-item-arrow">&rarr;</span>
+          </a>
+          <a href="https://wa.me/595981244799?text=Hola%20Taitashu%20Luque%2C%20quiero%20hacer%20un%20pedido" target="_blank" rel="noopener noreferrer" class="wa-modal-item">
+            <div>
+              <div class="wa-item-city">Luque</div>
+              <div class="wa-item-phone">+595 981 244799</div>
+            </div>
+            <span class="wa-item-arrow">&rarr;</span>
+          </a>
+          <a href="https://wa.me/595984105405?text=Hola%20Taitashu%20Fernando%20de%20la%20Mora%2C%20quiero%20hacer%20un%20pedido" target="_blank" rel="noopener noreferrer" class="wa-modal-item">
+            <div>
+              <div class="wa-item-city">Fernando de la Mora</div>
+              <div class="wa-item-phone">+595 984 105405</div>
+            </div>
+            <span class="wa-item-arrow">&rarr;</span>
+          </a>
+          <a href="https://wa.me/595981105681?text=Hola%20Taitashu%20Mariano%2C%20quiero%20hacer%20un%20pedido" target="_blank" rel="noopener noreferrer" class="wa-modal-item">
+            <div>
+              <div class="wa-item-city">Mariano Roque Alonso</div>
+              <div class="wa-item-phone">+595 981 105681</div>
+            </div>
+            <span class="wa-item-arrow">&rarr;</span>
+          </a>
+        </div>
+      </div>
+
+      <button class="wa-float-btn" id="waFloatBtn" aria-label="Pedir por WhatsApp">
+        <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+        <span>Pedir WhatsApp</span>
+      </button>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+      <img src="./assets/taitashu-logo.png" alt="TAITASHU" class="footer-mark" />
+      <p class="footer-line-1">© 2026 TAITASHU — Burgers al fuego. Todos los derechos reservados.</p>
+      <p class="footer-line-2">5 Sucursales: Asunción • Lambaré • Luque • Fernando de la Mora • Mariano Roque Alonso</p>
+    </footer>
+  </main>
+
+  <!-- GSAP & Lenis Application Script -->
+  <script>
+    (function () {
+      const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      // Register ScrollTrigger
+      gsap.registerPlugin(ScrollTrigger);
+
+      // Lenis Smooth Scroll Setup
+      let lenis = null;
+      if (!reduceMotion && typeof Lenis !== 'undefined') {
+        lenis = new Lenis({
+          lerp: 0.09,
+          smoothWheel: true,
+        });
+
+        lenis.on('scroll', ScrollTrigger.update);
+        gsap.ticker.add((time) => {
+          lenis.raf(time * 1000);
+        });
+        gsap.ticker.lagSmoothing(0);
+      }
+
+      // 1. Character Split Helper
+      function splitChars(el) {
+        if (!el) return [];
+        const text = el.textContent;
+        el.innerHTML = '';
+        const chars = [];
+        for (let i = 0; i < text.length; i++) {
+          const ch = text[i];
+          const span = document.createElement('span');
+          span.className = 'char';
+          span.textContent = ch === ' ' ? '\u00A0' : ch;
+          // Apply red to "SHU" if it's the hero or finale title
+          if (el.id === 'heroTitle' && i >= 5) {
+            span.classList.add('char-red');
+          }
+          el.appendChild(span);
+          chars.push(span);
+        }
+        return chars;
+      }
+
+      const heroEl = document.getElementById('heroTitle');
+      const finaleEl = document.getElementById('finaleTitle');
+      const heroChars = splitChars(heroEl);
+      const finaleChars = splitChars(finaleEl);
+
+      // Hero character-split reveal (load-in)
+      if (!reduceMotion) {
+        gsap.set(heroChars, { yPercent: 120 });
+        const heroTl = gsap.timeline({ delay: 0.2 });
+        heroTl
+          .to(heroChars, {
+            yPercent: 0,
+            stagger: 0.045,
+            ease: 'power4.out',
+            duration: 0.9,
+          }, 0)
+          .to('.hero-sub, .hero-tag, .hero-actions', {
+            opacity: 1,
+            duration: 0.6,
+          }, 0.55)
+          .to('.scroll-cue', {
+            opacity: 0.55,
+            duration: 0.6,
+          }, 0.8);
+      } else {
+        gsap.set('.hero-sub, .hero-tag, .hero-actions, .scroll-cue', { opacity: 1 });
+      }
+
+      // Generate 60 static ember dots for Scene A
+      const embersDom = document.getElementById('embersDom');
+      if (embersDom) {
+        let embersHTML = '';
+        for (let i = 0; i < 60; i++) {
+          const left = (Math.random() * 100).toFixed(2);
+          const top = (20 + Math.random() * 80).toFixed(2);
+          const opacity = (0.2 + Math.random() * 0.6).toFixed(2);
+          embersHTML += `<div class="ember" style="left:${left}%; top:${top}%; opacity:${opacity};"></div>`;
+        }
+        embersDom.innerHTML = embersHTML;
+      }
+
+      // Ambient Canvas Particles (Scene A)
+      const canvas = document.getElementById('embers');
+      if (canvas && !reduceMotion) {
+        const ctx = canvas.getContext('2d');
+        let w, h;
+        const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+
+        function resizeCanvas() {
+          w = canvas.clientWidth;
+          h = canvas.clientHeight;
+          canvas.width = w * dpr;
+          canvas.height = h * dpr;
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        const particleCount = 46;
+        const particles = [];
+        for (let i = 0; i < particleCount; i++) {
+          particles.push({
+            x: Math.random() * w,
+            y: h * 0.4 + Math.random() * (h * 0.6),
+            r: 0.6 + Math.random() * 1.6,
+            vy: -(0.10 + Math.random() * 0.18),
+            vx: (Math.random() - 0.5) * 0.1,
+            a: 0.2 + Math.random() * 0.4,
+            phase: Math.random() * Math.PI * 2,
+          });
+        }
+
+        let t = 0;
+        function renderEmbers() {
+          const st = ScrollTrigger.getById('sceneA');
+          const p = st ? st.progress : 0;
+          const ambientAlpha = Math.max(0, 1 - p / 0.35);
+
+          if (ambientAlpha <= 0) {
+            ctx.clearRect(0, 0, w, h);
+            requestAnimationFrame(renderEmbers);
+            return;
+          }
+
+          t += 0.02;
+          ctx.clearRect(0, 0, w, h);
+
+          for (let i = 0; i < particleCount; i++) {
+            const pt = particles[i];
+            pt.y += pt.vy;
+            pt.x += pt.vx + Math.sin(t + pt.phase) * 0.05;
+
+            if (pt.y < -10) {
+              pt.y = h + 10;
+              pt.x = Math.random() * w;
+            }
+
+            const fl = 0.6 + 0.4 * Math.sin(t * 1.6 + pt.phase);
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, pt.r, 0, Math.PI * 2);
+            ctx.fillStyle = '#ffb703';
+            ctx.globalAlpha = pt.a * ambientAlpha * fl;
+            ctx.fill();
+          }
+
+          requestAnimationFrame(renderEmbers);
+        }
+        requestAnimationFrame(renderEmbers);
+      }
+
+      // SCENE A: Ignicion Timeline
+      const tlA = gsap.timeline({
+        scrollTrigger: {
+          trigger: '#sceneA',
+          start: 'top top',
+          end: '+=160%',
+          scrub: 1,
+          pin: true,
+          pinSpacing: true,
+          id: 'sceneA',
+        },
+      });
+
+      tlA
+        .to('.scroll-cue', { opacity: 0, duration: 0.1 }, 0)
+        .to('#photoA', { scale: 1.22, duration: 1.1, ease: 'none' }, 0)
+        .to('.hero-copy', { opacity: 0, y: -40, duration: 0.35, ease: 'power1.in' }, 0.28)
+        .to('.embers-dom', { opacity: 0.15, duration: 0.6 }, 0.5)
+        .to('#sceneA', { filter: 'brightness(0.4)', duration: 0.3 }, 0.7);
+
+      // SCENE B: Plancha Timeline
+      const tlB = gsap.timeline({
+        scrollTrigger: {
+          trigger: '#sceneB',
+          start: 'top top',
+          end: '+=130%',
+          scrub: 1,
+          pin: true,
+          pinSpacing: true,
+          id: 'sceneB',
+        },
+      });
+
+      tlB
+        .to('#photoB', { scale: 1.12, duration: 1, ease: 'none' }, 0)
+        .to('#heatBlob1, #heatBlob2', { opacity: 0.5, duration: 0.3 }, 0)
+        .to('#smokeLeft', { xPercent: -100, duration: 0.5, ease: 'power2.inOut' }, 0.12)
+        .to('#smokeRight', { xPercent: 100, duration: 0.5, ease: 'power2.inOut' }, 0.12)
+        .to('#wipeTitle', { clipPath: 'inset(0 0% 0 0)', duration: 0.4, ease: 'power3.out' }, 0.3)
+        .to('#sceneBSub', { opacity: 0.85, duration: 0.3 }, 0.45)
+        .to('#sceneB', { filter: 'brightness(0.55)', duration: 0.25 }, 0.8);
+
+      // SCENE C: Smash Timeline
+      const tlC = gsap.timeline({
+        scrollTrigger: {
+          trigger: '#sceneC',
+          start: 'top top',
+          end: '+=140%',
+          scrub: 1,
+          pin: true,
+          pinSpacing: true,
+          id: 'sceneC',
+        },
+      });
+
+      tlC
+        .to('#photoC', { scale: 1.1, duration: 1.1, ease: 'none' }, 0)
+        .to('#searFlash', { opacity: 1, scaleY: 1, duration: 0.5, ease: 'power2.out' }, 0)
+        .to('#spatulaLine', { opacity: 1, duration: 0.2 }, 0.25)
+        .to('.layer', { opacity: 1, y: 0, stagger: 0.08, duration: 0.4, ease: 'power2.out' }, 0.3)
+        .to('#smashCopy', { opacity: 1, duration: 0.3 }, 0.65);
+
+      // Smoke wisps for Scene C
+      if (!reduceMotion) {
+        const sceneC = document.getElementById('sceneC');
+        for (let i = 0; i < 18; i++) {
+          const wisp = document.createElement('div');
+          wisp.className = 'smoke';
+          wisp.style.left = (30 + Math.random() * 40) + '%';
+          wisp.style.top = '60%';
+          sceneC.appendChild(wisp);
+
+          const dur = 4 + Math.random() * 4;
+          const del = Math.random() * 4;
+          const targetY = -(140 + Math.random() * 80);
+
+          gsap.to(wisp, {
+            y: targetY,
+            opacity: 0.5,
+            duration: dur,
+            delay: del,
+            repeat: -1,
+            ease: 'sine.inOut',
+            onRepeat: () => {
+              gsap.set(wisp, { y: 0, opacity: 0 });
+            },
+          });
+        }
+      }
+
+      // SCENE D: Servido Timeline
+      const counterObj = { v: 0 };
+      const counterEl = document.getElementById('orderCounter');
+
+      const tlD = gsap.timeline({
+        scrollTrigger: {
+          trigger: '#sceneD',
+          start: 'top top',
+          end: '+=150%',
+          scrub: 1,
+          pin: true,
+          pinSpacing: true,
+          id: 'sceneD',
+        },
+      });
+
+      tlD
+        .to('#photoD', { scale: 1.08, duration: 1.3, ease: 'none' }, 0)
+        .to(finaleChars, {
+          clipPath: 'inset(0 0 0% 0)',
+          stagger: 0.05,
+          duration: 0.5,
+          ease: 'power3.out',
+        }, 0.05)
+        .to('#finaleTag', { opacity: 1, duration: 0.3 }, 0.45)
+        .to('#counterRow', { opacity: 1, duration: 0.2 }, 0.55)
+        .to(counterObj, {
+          v: 1,
+          duration: 0.3,
+          onUpdate: () => {
+            if (counterEl) {
+              counterEl.textContent = String(Math.round(counterObj.v)).padStart(3, '0');
+            }
+          },
+        }, 0.6)
+        .to('#seamFade', { opacity: 1, duration: 0.35, ease: 'power1.in' }, 0.78);
+
+      // SECTION 5: Menú Scrub
+      const cards = gsap.utils.toArray('.m-card');
+      const totalCards = cards.length;
+      const menuIndexDisplay = document.getElementById('menuIndexDisplay');
+      const menuProgressFill = document.getElementById('menuProgressFill');
+
+      // Initialize menu card states
+      gsap.set(cards[0], { y: 0, rotate: 0, opacity: 1, scale: 1 });
+      for (let i = 1; i < totalCards; i++) {
+        gsap.set(cards[i], { y: '60vh', rotate: 10, opacity: 0, scale: 0.94 });
+      }
+
+      if (!reduceMotion) {
+        const menuTl = gsap.timeline({
+          scrollTrigger: {
+            trigger: '#menuPin',
+            start: 'top top',
+            end: '+=' + (totalCards * 100) + '%',
+            scrub: 1,
+            pin: true,
+            pinSpacing: true,
+            onUpdate: (self) => {
+              const idx = Math.min(totalCards - 1, Math.floor(self.progress * totalCards));
+              if (menuIndexDisplay) {
+                menuIndexDisplay.innerHTML = `${String(idx + 1).padStart(2, '0')}<span>/ 08</span>`;
+              }
+              if (menuProgressFill) {
+                menuProgressFill.style.width = (self.progress * 100).toFixed(1) + '%';
+              }
+            },
+          },
+        });
+
+        for (let j = 0; j < totalCards - 1; j++) {
+          menuTl
+            .to(cards[j], {
+              y: '-60vh',
+              rotate: -10,
+              opacity: 0,
+              scale: 0.94,
+              duration: 0.4,
+              ease: 'power2.in',
+            }, j + 0.3)
+            .fromTo(cards[j + 1], {
+              y: '60vh',
+              rotate: 10,
+              opacity: 0,
+              scale: 0.94,
+            }, {
+              y: 0,
+              rotate: 0,
+              opacity: 1,
+              scale: 1,
+              duration: 0.4,
+              ease: 'power2.out',
+            }, j + 0.3);
+        }
+      }
+
+      // SECTION 6: Infinite Marquee
+      if (!reduceMotion) {
+        gsap.to('#marqueeRow1', {
+          xPercent: -100,
+          duration: 18,
+          ease: 'none',
+          repeat: -1,
+        });
+        gsap.to('#marqueeRow2', {
+          xPercent: -100,
+          duration: 18,
+          ease: 'none',
+          repeat: -1,
+        });
+      }
+
+      // SECTION 7: Local Cards & Info Reveal
+      gsap.utils.toArray('.local-card').forEach((card, index) => {
+        gsap.from(card, {
+          opacity: 0,
+          y: 35,
+          duration: 0.65,
+          delay: index * 0.08,
+          ease: 'power2.out',
+          scrollTrigger: {
+            trigger: card,
+            start: 'top 92%',
+          },
+        });
+      });
+
+      // WhatsApp Floating Widget & Modal Controls
+      const waFloatBtn = document.getElementById('waFloatBtn');
+      const waFloatModal = document.getElementById('waFloatModal');
+      const waModalClose = document.getElementById('waModalClose');
+
+      if (waFloatBtn && waFloatModal) {
+        waFloatBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          waFloatModal.classList.toggle('open');
+        });
+      }
+
+      if (waModalClose && waFloatModal) {
+        waModalClose.addEventListener('click', () => {
+          waFloatModal.classList.remove('open');
+        });
+      }
+
+      document.addEventListener('click', (e) => {
+        if (waFloatModal && waFloatModal.classList.contains('open')) {
+          if (!waFloatModal.contains(e.target) && e.target !== waFloatBtn && !waFloatBtn.contains(e.target)) {
+            waFloatModal.classList.remove('open');
+          }
+        }
+      });
+
+      // Pedido Form -> Direct WhatsApp Routing
+      const pedidoForm = document.getElementById('pedidoForm');
+      const formSuccessBanner = document.getElementById('formSuccessBanner');
+
+      if (pedidoForm) {
+        pedidoForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const localSelect = document.getElementById('localSelect');
+          const nombreInput = document.getElementById('nombreInput');
+          const telInput = document.getElementById('telInput');
+          const msgInput = document.getElementById('msgInput');
+
+          const phone = localSelect ? localSelect.value : '595994223094';
+          const localName = localSelect ? localSelect.options[localSelect.selectedIndex].text.split('(')[0].trim() : 'Central';
+          const nombre = nombreInput ? nombreInput.value.trim() : '';
+          const tel = telInput ? telInput.value.trim() : '';
+          const pedido = msgInput ? msgInput.value.trim() : '';
+
+          const text = `¡Hola TAITASHU ${localName}! 👋\nMi nombre es: ${nombre}\nMi teléfono: ${tel}\nQuisiera hacer el siguiente pedido:\n${pedido}`;
+          const encoded = encodeURIComponent(text);
+          const waUrl = `https://wa.me/${phone}?text=${encoded}`;
+
+          if (formSuccessBanner) {
+            formSuccessBanner.style.display = 'block';
+          }
+
+          setTimeout(() => {
+            window.open(waUrl, '_blank', 'noopener,noreferrer');
+            if (formSuccessBanner) {
+              formSuccessBanner.textContent = '¡Redirigido a WhatsApp! Tu pedido está en camino a la plancha.';
+            }
+          }, 800);
+        });
+      }
+
+      // Adaptive Header Contrast & Heat Readout via Ticker
+      const header = document.getElementById('siteHeader');
+      const chapterLabel = document.getElementById('chapterLabel');
+      const headerProgressFill = document.getElementById('headerProgressFill');
+      const heatGauge = document.getElementById('heatGauge');
+      const filmScroll = document.getElementById('filmScroll');
+      const CHAPTERS = ['IGNICIÓN', 'PLANCHA', 'SMASH', 'SERVIDO'];
+
+      gsap.ticker.add(() => {
+        // 1. Contrast Toggle
+        const headerSections = document.querySelectorAll('[data-header]');
+        let currentHeaderMode = 'dark';
+        for (const sec of headerSections) {
+          const rect = sec.getBoundingClientRect();
+          if (rect.top <= 1 && rect.bottom > 1) {
+            currentHeaderMode = sec.getAttribute('data-header');
+            break;
+          }
+        }
+        if (header) {
+          if (currentHeaderMode === 'light') {
+            header.classList.add('on-light');
+          } else {
+            header.classList.remove('on-light');
+          }
+        }
+
+        // 2. Heat / Chapter Progress Readout
+        if (filmScroll && chapterLabel && headerProgressFill && heatGauge) {
+          const rect = filmScroll.getBoundingClientRect();
+          const totalScrollable = rect.height - window.innerHeight;
+          const p = totalScrollable > 0 ? Math.min(Math.max(-rect.top / totalScrollable, 0), 1) : 0;
+
+          headerProgressFill.style.width = (p * 100).toFixed(1) + '%';
+          heatGauge.textContent = Math.round(180 + p * 100) + '°';
+
+          const chIdx = Math.min(CHAPTERS.length - 1, Math.floor(p * CHAPTERS.length));
+          chapterLabel.textContent = CHAPTERS[chIdx];
+        }
+      });
+
+      // Recalculate ScrollTrigger on Font Load
+      if (document.fonts) {
+        document.fonts.ready.then(() => {
+          ScrollTrigger.refresh();
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
