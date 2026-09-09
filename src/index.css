@@ -1,1 +1,84 @@
 @import "tailwindcss";
+
+@layer base {
+  :root {
+    --black: #0a0908;
+    --char: #14110f;
+    --char-2: #211c19;
+    --char-3: #2d2622;
+    --cream: #f4ead9;
+    --cream-2: #e9dcc2;
+    --off-white: #f5f2eb;
+    --red: #e2231a;
+    --red-hover: #b81710;
+    --flame-orange: #ff7a1a;
+    --flame-gold: #ffb703;
+    --font-display: 'Anton', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-body: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    background-color: var(--black);
+    color: var(--off-white);
+    font-family: var(--font-body);
+  }
+
+  body {
+    background-color: var(--black);
+    color: var(--off-white);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background-color: var(--flame-orange);
+    color: #000;
+  }
+}
+
+/* Custom typography classes */
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: 0.03em;
+}
+
+.font-body {
+  font-family: var(--font-body);
+}
+
+/* Subtle background grain */
+.bg-grain {
+  background-image: radial-gradient(rgba(255, 122, 26, 0.08) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Flame glow animation */
+@keyframes flamePulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(226, 35, 26, 0.4), 0 0 40px rgba(255, 122, 26, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 28px rgba(226, 35, 26, 0.65), 0 0 55px rgba(255, 122, 26, 0.35);
+  }
+}
+
+.flame-glow {
+  animation: flamePulse 2.5s infinite ease-in-out;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0908;
+}
+::-webkit-scrollbar-thumb {
+  background: #2b2520;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--flame-orange);
+}
