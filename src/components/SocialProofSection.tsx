@@ -1,5 +1,6 @@
 import React from 'react';
-import { motion, useReducedMotion } from 'motion/react';
+import { motion } from 'motion/react';
+import { useReducedMotion } from '../hooks/useReducedMotion';
 import { Star, Instagram, Flame, Sparkles } from 'lucide-react';
 import { REVIEWS } from '../data/menuData';
 import { buttonTapMotion, EASE_EXPO } from '../utils/motion';

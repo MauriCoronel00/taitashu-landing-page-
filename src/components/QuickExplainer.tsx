@@ -1,5 +1,6 @@
 import React from 'react';
-import { motion, useReducedMotion } from 'motion/react';
+import { motion } from 'motion/react';
+import { useReducedMotion } from '../hooks/useReducedMotion';
 import { Flame, MapPin, Zap } from 'lucide-react';
 import { EASE_EXPO } from '../utils/motion';
 

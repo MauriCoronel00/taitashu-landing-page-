@@ -1,5 +1,6 @@
 import React from 'react';
-import { motion, useReducedMotion } from 'motion/react';
+import { motion } from 'motion/react';
+import { useReducedMotion } from '../hooks/useReducedMotion';
 import { Star, Flame, ArrowRight, Sparkles } from 'lucide-react';
 import { Product } from '../types';
 import { formatGs } from '../utils/whatsapp';
@@ -189,9 +190,9 @@ export const FavoritesSection: React.FC<FavoritesSectionProps> = ({
                 <motion.button
                   id={`btn-fav-pedir-${item.id}`}
                   onClick={() => handleOrderClick(item)}
-                  whileHover={{ scale: 1.05 }}
+                  whileHover={{ scale: 1.02 }}
                   whileTap={buttonTapMotion}
-                  className="bg-[#e2231a] hover:bg-[#b81710] text-[#f5f2eb] font-display text-base tracking-wider px-5 py-3 rounded-xl shadow-md transition-colors flex items-center gap-2 cursor-pointer border border-[#ff7a1a]/30"
+                  className="btn-tactile bg-[#e2231a] hover:bg-[#c91d15] text-[#f5f2eb] font-display text-base tracking-wider px-5 py-2.5 rounded-xl border border-[#b81710] transition-colors flex items-center gap-1.5 cursor-pointer active:translate-y-0.5"
                 >
                   <Flame className="w-4 h-4 text-[#ffb703] fill-[#ffb703]" />
                   <span>PEDIR</span>
@@ -212,12 +213,12 @@ export const FavoritesSection: React.FC<FavoritesSectionProps> = ({
           <motion.button
             id="btn-ver-menu-completo"
             onClick={handleViewAllMenu}
-            whileHover={{ scale: 1.03, y: -2 }}
+            whileHover={{ scale: 1.02 }}
             whileTap={buttonTapMotion}
-            className="inline-flex items-center gap-3 bg-[#1e1916] hover:bg-[#2a231f] text-[#f5f2eb] hover:text-[#ff7a1a] font-bold text-base px-8 py-4 rounded-2xl border border-[#2d2622] transition-all shadow-xl group cursor-pointer"
+            className="btn-tactile inline-flex items-center gap-3 bg-[#1c1917] hover:bg-[#292524] text-[#f5f2eb] hover:text-[#ff7a1a] font-bold text-base px-8 py-3.5 rounded-xl border border-[#3a322c] transition-colors group cursor-pointer active:translate-y-0.5"
           >
             <span>VER MENÚ COMPLETO →</span>
-            <Flame className="w-4 h-4 text-[#ff7a1a] group-hover:scale-110 transition-transform" />
+            <Flame className="w-4 h-4 text-[#ff7a1a]" />
           </motion.button>
         </motion.div>
       </div>

@@ -1,5 +1,6 @@
 import React from 'react';
-import { motion, useReducedMotion } from 'motion/react';
+import { motion } from 'motion/react';
+import { useReducedMotion } from '../hooks/useReducedMotion';
 import { Flame, ArrowRight, Sparkles, Clock, MapPin } from 'lucide-react';
 import { trackEvent } from '../utils/analytics';
 import { buttonTapMotion } from '../utils/motion';
@@ -129,15 +130,15 @@ export const Hero: React.FC<HeroProps> = ({ onOpenOrder, onScrollToMenu }) => {
               variants={itemVariants}
               className="mt-7 sm:mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 w-full sm:w-auto"
             >
-              {/* Dominant Primary CTA with Magnetic / Spring Motion */}
+              {/* Dominant Primary CTA */}
               <motion.button
                 id="hero-cta-order"
                 onClick={handlePrimaryCta}
-                whileHover={{ scale: 1.03, y: -2 }}
+                whileHover={{ scale: 1.02 }}
                 whileTap={buttonTapMotion}
-                className="flame-glow bg-[#e2231a] hover:bg-[#b81710] text-[#f5f2eb] font-display text-xl tracking-wider px-8 py-4 sm:py-4.5 rounded-2xl shadow-2xl transition-colors flex items-center justify-center gap-3 cursor-pointer border border-[#ff7a1a]/50"
+                className="btn-tactile bg-[#e2231a] hover:bg-[#c91d15] text-[#f5f2eb] font-display text-xl tracking-wider px-8 py-4 sm:py-4.5 rounded-xl transition-all flex items-center justify-center gap-3 cursor-pointer border border-[#b81710] active:translate-y-0.5"
               >
-                <Flame className="w-6 h-6 text-[#ffb703] fill-[#ffb703] animate-pulse" />
+                <Flame className="w-6 h-6 text-[#ffb703] fill-[#ffb703]" />
                 <span>PEDIR AHORA</span>
                 <ArrowRight className="w-5 h-5 text-white/90" />
               </motion.button>
@@ -146,9 +147,9 @@ export const Hero: React.FC<HeroProps> = ({ onOpenOrder, onScrollToMenu }) => {
               <motion.button
                 id="hero-cta-menu"
                 onClick={handleSecondaryCta}
-                whileHover={{ scale: 1.02, backgroundColor: 'rgba(45, 38, 34, 0.95)' }}
+                whileHover={{ scale: 1.02 }}
                 whileTap={buttonTapMotion}
-                className="bg-[#211c19]/90 text-[#f5f2eb] hover:text-[#ff7a1a] font-bold text-base px-6 py-4 rounded-2xl border border-white/10 transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-md"
+                className="btn-tactile bg-[#211c19] hover:bg-[#2d2622] text-[#f5f2eb] hover:text-[#ff7a1a] font-bold text-base px-6 py-4 rounded-xl border border-[#3a322c] transition-all flex items-center justify-center gap-2 cursor-pointer active:translate-y-0.5"
               >
                 <span>VER MENÚ COMPLETO</span>
               </motion.button>
@@ -232,10 +233,10 @@ export const Hero: React.FC<HeroProps> = ({ onOpenOrder, onScrollToMenu }) => {
                     </p>
                   </div>
                   <motion.button
-                    whileHover={{ scale: 1.05 }}
+                    whileHover={{ scale: 1.02 }}
                     whileTap={buttonTapMotion}
                     onClick={handlePrimaryCta}
-                    className="shrink-0 bg-[#ff7a1a] hover:bg-[#e2231a] text-black hover:text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-colors cursor-pointer shadow"
+                    className="btn-tactile shrink-0 bg-[#e2231a] hover:bg-[#c91d15] text-white font-bold text-xs px-4 py-2.5 rounded-lg transition-colors cursor-pointer border border-[#b81710]"
                   >
                     PEDIR ESTA
                   </motion.button>

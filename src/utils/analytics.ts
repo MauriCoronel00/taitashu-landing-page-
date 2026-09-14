@@ -17,8 +17,11 @@ export type AnalyticsEventName =
   | 'view_product'
   | 'select_product'
   | 'add_to_order'
+  | 'add_to_cart'
   | 'select_branch'
   | 'whatsapp_order_sent'
+  | 'whatsapp_order_sent_direct'
+  | 'whatsapp_multi_order_sent'
   | 'branch_maps_clicked';
 
 export function trackEvent(eventName: AnalyticsEventName, payload: Record<string, unknown> = {}) {

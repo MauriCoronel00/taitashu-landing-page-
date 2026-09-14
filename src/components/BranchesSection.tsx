@@ -1,5 +1,6 @@
 import React from 'react';
-import { motion, useReducedMotion } from 'motion/react';
+import { motion } from 'motion/react';
+import { useReducedMotion } from '../hooks/useReducedMotion';
 import { MapPin, Clock, Phone, ExternalLink, Flame } from 'lucide-react';
 import { BRANCHES } from '../data/branchesData';
 import { trackEvent } from '../utils/analytics';
@@ -150,7 +151,7 @@ export const BranchesSection: React.FC<BranchesSectionProps> = ({ onSelectBranch
                   whileHover={{ scale: 1.02 }}
                   whileTap={buttonTapMotion}
                   onClick={() => handleBranchOrder(b.id, b.name)}
-                  className="w-full bg-[#e2231a] hover:bg-[#b81710] text-[#f5f2eb] font-bold text-xs sm:text-sm py-3 px-4 rounded-xl shadow transition-colors flex items-center justify-center gap-2 cursor-pointer border border-[#ff7a1a]/30"
+                  className="btn-tactile w-full bg-[#e2231a] hover:bg-[#c91d15] text-[#f5f2eb] font-bold text-xs sm:text-sm py-3 px-4 rounded-xl border border-[#b81710] transition-colors flex items-center justify-center gap-2 cursor-pointer active:translate-y-0.5"
                 >
                   <Flame className="w-4 h-4 text-[#ffb703] fill-[#ffb703]" />
                   <span>PEDIR EN ESTA SUCURSAL</span>
@@ -162,7 +163,7 @@ export const BranchesSection: React.FC<BranchesSectionProps> = ({ onSelectBranch
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => handleMapsClick(b.name, b.gmapsUrl)}
-                  className="w-full bg-[#1e1916] hover:bg-[#28211d] text-[#f5f2eb]/75 hover:text-white font-medium text-xs py-2.5 px-3 rounded-xl transition-colors flex items-center justify-center gap-1.5 border border-[#2b2420]"
+                  className="btn-tactile w-full bg-[#1c1917] hover:bg-[#28211d] text-[#f5f2eb]/80 hover:text-white font-medium text-xs py-2.5 px-3 rounded-xl transition-colors flex items-center justify-center gap-1.5 border border-[#2d2622] active:translate-y-0.5"
                 >
                   <span>Ver ubicación en Google Maps</span>
                   <ExternalLink className="w-3.5 h-3.5 text-white/50" />

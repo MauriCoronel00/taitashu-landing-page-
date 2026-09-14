@@ -35,6 +35,24 @@ export type ComboType = 'solo' | 'combo_papas' | 'combo_completo';
 
 export type OrderType = 'delivery' | 'takeaway' | 'salon';
 
+export interface CartItem {
+  id: string;
+  product: Product;
+  quantity: number;
+  comboType: ComboType;
+  selectedExtras: string[]; // ExtraOption IDs
+  notes?: string;
+}
+
+export interface MultiItemOrder {
+  items: CartItem[];
+  branchId: string;
+  orderType: OrderType;
+  deliveryAddress: string;
+  customerName: string;
+  generalNotes: string;
+}
+
 export interface OrderItemCustomization {
   product: Product;
   quantity: number;

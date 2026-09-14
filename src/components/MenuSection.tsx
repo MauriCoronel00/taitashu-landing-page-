@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
-import { Flame } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { useReducedMotion } from '../hooks/useReducedMotion';
+import { Flame, Plus } from 'lucide-react';
 import { Product } from '../types';
 import { formatGs } from '../utils/whatsapp';
 import { trackEvent } from '../utils/analytics';
@@ -93,7 +94,7 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ products, onOpenOrder 
                   <motion.span
                     layoutId="activeCategoryPill"
                     transition={{ type: 'spring', stiffness: 450, damping: 35 }}
-                    className="absolute inset-0 bg-[#e2231a] rounded-full shadow-lg shadow-red-950/60 border border-[#ff7a1a]/40"
+                    className="absolute inset-0 bg-[#e2231a] rounded-full"
                   />
                 )}
                 <span className="relative z-10">{tab.label}</span>
@@ -191,9 +192,9 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ products, onOpenOrder 
                     <motion.button
                       id={`menu-item-order-${product.id}`}
                       onClick={() => handleSelectProduct(product)}
-                      whileHover={{ scale: 1.05 }}
+                      whileHover={{ scale: 1.02 }}
                       whileTap={buttonTapMotion}
-                      className="bg-[#e2231a] hover:bg-[#b81710] text-[#f5f2eb] font-bold text-xs px-4 py-2.5 rounded-xl shadow transition-colors flex items-center gap-1.5 cursor-pointer border border-[#ff7a1a]/30"
+                      className="btn-tactile bg-[#e2231a] hover:bg-[#c91d15] text-[#f5f2eb] font-bold text-xs px-4 py-2.5 rounded-lg border border-[#b81710] transition-colors flex items-center gap-1.5 cursor-pointer active:translate-y-0.5"
                     >
                       <Flame className="w-3.5 h-3.5 text-[#ffb703] fill-[#ffb703]" />
                       <span>PEDIR</span>

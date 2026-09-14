@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Menu, X, Flame } from 'lucide-react';
+import { Menu, X, Flame, ShoppingBag } from 'lucide-react';
 import { trackEvent } from '../utils/analytics';
 import { buttonTapMotion } from '../utils/motion';
+import { formatGs } from '../utils/whatsapp';
 
 interface NavbarProps {
   onOpenOrder: (productId?: string) => void;
+  cartItemCount?: number;
+  cartTotal?: number;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onOpenOrder }) => {
+export const Navbar: React.FC<NavbarProps> = ({ onOpenOrder, cartItemCount = 0, cartTotal = 0 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -66,7 +69,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenOrder }) => {
             <img
               src="./assets/taitashu-logo.png"
               alt="TaitaShu Burgers al Fuego"
-              className="h-10 sm:h-12 w-auto object-contain drop-shadow-[0_0_12px_rgba(226,35,26,0.35)]"
+              className="h-10 sm:h-12 w-auto object-contain"
             />
           </motion.div>
           <div className="hidden sm:flex flex-col">
@@ -74,7 +77,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenOrder }) => {
               TAITASHU
             </span>
             <span className="text-[10px] uppercase font-bold tracking-widest text-[#ff7a1a] mt-0.5 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#e2231a] animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#e2231a]" />
               Smash al Fuego
             </span>
           </div>
@@ -100,17 +103,26 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenOrder }) => {
           ))}
         </nav>
 
-        {/* Header Right Action (Magnetic / Reactive Button) */}
+        {/* Header Right Action */}
         <div className="hidden sm:flex items-center gap-4">
           <motion.button
             id="navbar-cta-btn"
             onClick={handleCtaClick}
-            whileHover={{ scale: 1.03, y: -1 }}
+            whileHover={{ scale: 1.02 }}
             whileTap={buttonTapMotion}
-            className="flame-glow bg-[#e2231a] hover:bg-[#b81710] text-[#f5f2eb] font-bold text-sm tracking-wide px-5 py-2.5 rounded-full shadow-lg shadow-red-950/40 transition-colors flex items-center gap-2 cursor-pointer border border-[#ff7a1a]/40"
+            className="btn-tactile bg-[#e2231a] hover:bg-[#c91d15] text-[#f5f2eb] font-bold text-sm tracking-wide px-5 py-2.5 rounded-xl border border-[#b81710] transition-colors flex items-center gap-2 cursor-pointer active:translate-y-0.5"
           >
-            <Flame className="w-4 h-4 text-[#ffb703] fill-[#ffb703]" />
-            <span>PEDIR AHORA</span>
+            {cartItemCount > 0 ? (
+              <>
+                <ShoppingBag className="w-4 h-4 text-white" />
+                <span>PEDIDO ({cartItemCount}) • {formatGs(cartTotal)}</span>
+              </>
+            ) : (
+              <>
+                <Flame className="w-4 h-4 text-[#ffb703] fill-[#ffb703]" />
+                <span>PEDIR AHORA</span>
+              </>
+            )}
           </motion.button>
         </div>
 
@@ -119,10 +131,19 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenOrder }) => {
           <motion.button
             whileTap={buttonTapMotion}
             onClick={handleCtaClick}
-            className="bg-[#e2231a] text-white text-xs font-bold px-3 py-2 rounded-full flex items-center gap-1 shadow-md shadow-red-950/50"
+            className="btn-tactile bg-[#e2231a] hover:bg-[#c91d15] text-white text-xs font-bold px-3 py-2 rounded-lg flex items-center gap-1.5 border border-[#b81710]"
           >
-            <Flame className="w-3.5 h-3.5 fill-[#ffb703] text-[#ffb703]" />
-            <span>PEDIR</span>
+            {cartItemCount > 0 ? (
+              <>
+                <ShoppingBag className="w-3.5 h-3.5 text-white" />
+                <span>PEDIDO ({cartItemCount})</span>
+              </>
+            ) : (
+              <>
+                <Flame className="w-3.5 h-3.5 fill-[#ffb703] text-[#ffb703]" />
+                <span>PEDIR</span>
+              </>
+            )}
           </motion.button>
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -189,10 +210,19 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenOrder }) => {
                 id="mobile-drawer-cta"
                 whileTap={buttonTapMotion}
                 onClick={handleCtaClick}
-                className="w-full bg-[#e2231a] hover:bg-[#b81710] text-[#f5f2eb] font-bold text-base py-3.5 rounded-xl shadow-lg flex items-center justify-center gap-2 cursor-pointer font-display tracking-wider"
+                className="btn-tactile w-full bg-[#e2231a] hover:bg-[#c91d15] text-[#f5f2eb] font-bold text-base py-3.5 rounded-xl border border-[#b81710] flex items-center justify-center gap-2 cursor-pointer font-display tracking-wider active:translate-y-0.5"
               >
-                <Flame className="w-5 h-5 text-[#ffb703] fill-[#ffb703]" />
-                <span>PEDIR AHORA POR WHATSAPP</span>
+                {cartItemCount > 0 ? (
+                  <>
+                    <ShoppingBag className="w-5 h-5 text-white" />
+                    <span>VER MI PEDIDO ({cartItemCount}) • {formatGs(cartTotal)}</span>
+                  </>
+                ) : (
+                  <>
+                    <Flame className="w-5 h-5 text-[#ffb703] fill-[#ffb703]" />
+                    <span>PEDIR AHORA POR WHATSAPP</span>
+                  </>
+                )}
               </motion.button>
             </div>
           </motion.div>

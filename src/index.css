@@ -54,18 +54,12 @@
   background-size: 24px 24px;
 }
 
-/* Flame glow animation */
-@keyframes flamePulse {
-  0%, 100% {
-    box-shadow: 0 0 20px rgba(226, 35, 26, 0.4), 0 0 40px rgba(255, 122, 26, 0.2);
-  }
-  50% {
-    box-shadow: 0 0 28px rgba(226, 35, 26, 0.65), 0 0 55px rgba(255, 122, 26, 0.35);
-  }
+/* Crisp tactile button transitions */
+.btn-tactile {
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
-
-.flame-glow {
-  animation: flamePulse 2.5s infinite ease-in-out;
+.btn-tactile:active {
+  transform: translateY(1px) scale(0.99);
 }
 
 /* Custom scrollbar */

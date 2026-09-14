@@ -1,6 +1,6 @@
 import { BRANCHES, CENTRAL_WHATSAPP } from '../data/branchesData';
 import { EXTRA_OPTIONS } from '../data/menuData';
-import { OrderItemCustomization } from '../types';
+import { CartItem, MultiItemOrder, OrderItemCustomization } from '../types';
 
 /**
  * Formats a number into Paraguayan Guaraníes (e.g., 50000 -> "50.000 Gs.")
@@ -10,18 +10,18 @@ export function formatGs(amount: number): string {
 }
 
 /**
- * Calculates the total cost for a customized order item
+ * Calculates the total cost for a cart item
  */
-export function calculateOrderTotal(item: OrderItemCustomization): number {
+export function calculateCartItemTotal(item: CartItem): number {
   let baseUnit = item.product.priceSolo;
 
   if (item.comboType === 'combo_completo') {
     baseUnit = item.product.priceCombo;
   } else if (item.comboType === 'combo_papas') {
-    // If combo papas only (no drink), standard formula: solo + 10.000 or combo - 5.000
-    baseUnit = item.product.category === 'extras' || item.product.category === 'bebidas'
-      ? item.product.priceSolo
-      : item.product.priceSolo + 10000;
+    baseUnit =
+      item.product.category === 'extras' || item.product.category === 'bebidas'
+        ? item.product.priceSolo
+        : item.product.priceSolo + 10000;
   }
 
   const extrasCost = item.selectedExtras.reduce((sum, extraId) => {
@@ -33,68 +33,143 @@ export function calculateOrderTotal(item: OrderItemCustomization): number {
 }
 
 /**
- * Generates the structured WhatsApp message according to UX requirements
+ * Calculates total for the whole multi-item order
  */
-export function generateWhatsAppMessage(item: OrderItemCustomization): string {
-  const branch = BRANCHES.find((b) => b.id === item.branchId) || BRANCHES[0];
-  const total = calculateOrderTotal(item);
+export function calculateMultiOrderTotal(order: MultiItemOrder): number {
+  return order.items.reduce((sum, item) => sum + calculateCartItemTotal(item), 0);
+}
 
-  const comboName =
-    item.comboType === 'combo_completo'
-      ? 'Combo Completo (+ papas y gaseosa)'
-      : item.comboType === 'combo_papas'
-      ? 'Hamburguesa + Papas'
-      : 'Solo hamburguesa (Huérfano)';
+/**
+ * Calculates the total cost for a customized order item (legacy/single item)
+ */
+export function calculateOrderTotal(item: OrderItemCustomization): number {
+  return calculateCartItemTotal({
+    id: 'single',
+    product: item.product,
+    quantity: item.quantity,
+    comboType: item.comboType,
+    selectedExtras: item.selectedExtras,
+    notes: item.notes,
+  });
+}
 
-  const extrasText =
-    item.selectedExtras.length > 0
-      ? item.selectedExtras
-          .map((id) => {
-            const extra = EXTRA_OPTIONS.find((e) => e.id === id);
-            return extra ? `🥓 + ${extra.name}` : '';
-          })
-          .filter(Boolean)
-          .join('\n')
-      : null;
+/**
+ * Generates formatted WhatsApp message for multi-item order
+ */
+export function generateMultiOrderWhatsAppMessage(order: MultiItemOrder): string {
+  const branch = BRANCHES.find((b) => b.id === order.branchId) || BRANCHES[0];
+  const total = calculateMultiOrderTotal(order);
 
   const orderTypeLabel =
-    item.orderType === 'delivery'
+    order.orderType === 'delivery'
       ? '🛵 Delivery directo a domicilio'
-      : item.orderType === 'takeaway'
+      : order.orderType === 'takeaway'
       ? '🥡 Para pasar a retirar (Take Away)'
       : '🍽️ Consumo en salón';
 
   let message = `Hola TaitaShu 👋\n\n`;
-  message += `Quiero realizar este pedido:\n`;
-  message += `🍔 ${item.quantity}x ${item.product.name} (${comboName})\n`;
+  message += `Quiero realizar este pedido:\n\n`;
 
-  if (extrasText) {
-    message += `${extrasText}\n`;
+  order.items.forEach((item, index) => {
+    const isBurger = item.product.category === 'doubles' || item.product.category === 'big-smash' || item.product.category === 'favorites';
+    const isDrink = item.product.category === 'bebidas';
+    const isSide = item.product.category === 'extras';
+    
+    let icon = '🍔';
+    if (isDrink) icon = '🥤';
+    else if (isSide) icon = '🍟';
+
+    const comboLabel = isBurger
+      ? item.comboType === 'combo_completo'
+        ? ' [Combo Completo: +papas y gaseosa]'
+        : item.comboType === 'combo_papas'
+        ? ' [Hamburguesa + Papas]'
+        : ' [Solo hamburguesa]'
+      : '';
+
+    const itemTotal = calculateCartItemTotal(item);
+
+    message += `${icon} *${item.quantity}x ${item.product.name}*${comboLabel} - ${formatGs(itemTotal)}\n`;
+
+    if (item.selectedExtras.length > 0) {
+      const extrasList = item.selectedExtras
+        .map((id) => {
+          const extra = EXTRA_OPTIONS.find((e) => e.id === id);
+          return extra ? `   ➕ ${extra.name}` : '';
+        })
+        .filter(Boolean)
+        .join('\n');
+      if (extrasList) message += `${extrasList}\n`;
+    }
+
+    if (item.notes && item.notes.trim()) {
+      message += `   ✏️ Nota: "${item.notes.trim()}"\n`;
+    }
+
+    if (index < order.items.length - 1) {
+      message += `\n`;
+    }
+  });
+
+  message += `\n━━━━━━━━━━━━━━━━━━━━\n`;
+  message += `💰 *TOTAL A PAGAR: ${formatGs(total)}*\n`;
+  message += `━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+  message += `📍 *Sucursal:* ${branch.name} (${branch.city})\n`;
+  message += `📦 *Modalidad:* ${orderTypeLabel}\n`;
+
+  if (order.orderType === 'delivery' && order.deliveryAddress.trim()) {
+    message += `🏠 *Dirección de entrega:* ${order.deliveryAddress.trim()}\n`;
   }
 
-  message += `\n📍 Sucursal: ${branch.name} (${branch.city})\n`;
-  message += `📦 Modalidad: ${orderTypeLabel}\n`;
-
-  if (item.orderType === 'delivery' && item.deliveryAddress.trim()) {
-    message += `🏠 Dirección de entrega: ${item.deliveryAddress.trim()}\n`;
+  if (order.customerName.trim()) {
+    message += `👤 *Cliente:* ${order.customerName.trim()}\n`;
   }
 
-  if (item.customerName.trim()) {
-    message += `👤 Nombre del cliente: ${item.customerName.trim()}\n`;
+  if (order.generalNotes.trim()) {
+    message += `📝 *Aclaraciones generales:* ${order.generalNotes.trim()}\n`;
   }
 
-  if (item.notes.trim()) {
-    message += `📝 Aclaraciones / Cocina: ${item.notes.trim()}\n`;
-  }
-
-  message += `\n💰 Total: ${formatGs(total)}\n\n`;
-  message += `Quiero coordinar el pedido.`;
+  message += `\n¿Me confirman disponibilidad para coordinar? Gracias!`;
 
   return message;
 }
 
 /**
- * Builds the wa.me link directed to the branch WhatsApp or central number
+ * Builds the wa.me link for multi-item order
+ */
+export function getMultiOrderWhatsAppUrl(order: MultiItemOrder): string {
+  const branch = BRANCHES.find((b) => b.id === order.branchId);
+  const targetPhone = branch?.whatsapp || CENTRAL_WHATSAPP;
+  const message = generateMultiOrderWhatsAppMessage(order);
+  return `https://wa.me/${targetPhone}?text=${encodeURIComponent(message)}`;
+}
+
+/**
+ * Generates the structured WhatsApp message according to UX requirements (legacy)
+ */
+export function generateWhatsAppMessage(item: OrderItemCustomization): string {
+  return generateMultiOrderWhatsAppMessage({
+    items: [
+      {
+        id: 'single',
+        product: item.product,
+        quantity: item.quantity,
+        comboType: item.comboType,
+        selectedExtras: item.selectedExtras,
+        notes: item.notes,
+      },
+    ],
+    branchId: item.branchId,
+    orderType: item.orderType,
+    deliveryAddress: item.deliveryAddress,
+    customerName: item.customerName,
+    generalNotes: '',
+  });
+}
+
+/**
+ * Builds the wa.me link directed to the branch WhatsApp or central number (legacy)
  */
 export function getWhatsAppOrderUrl(item: OrderItemCustomization): string {
   const branch = BRANCHES.find((b) => b.id === item.branchId);

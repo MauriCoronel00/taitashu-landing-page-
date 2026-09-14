@@ -1,5 +1,6 @@
 import React from 'react';
-import { motion, useReducedMotion } from 'motion/react';
+import { motion } from 'motion/react';
+import { useReducedMotion } from '../hooks/useReducedMotion';
 import { Flame, ArrowRight } from 'lucide-react';
 import { trackEvent } from '../utils/analytics';
 import { buttonTapMotion, EASE_EXPO } from '../utils/motion';
@@ -59,11 +60,11 @@ export const FinalCtaSection: React.FC<FinalCtaSectionProps> = ({ onOpenOrder })
           <motion.button
             id="final-cta-btn-order"
             onClick={handleClick}
-            whileHover={{ scale: 1.04, y: -2 }}
+            whileHover={{ scale: 1.02 }}
             whileTap={buttonTapMotion}
-            className="flame-glow bg-[#e2231a] hover:bg-[#b81710] text-[#f5f2eb] font-display text-2xl tracking-wider px-10 py-5 rounded-2xl shadow-2xl transition-colors flex items-center justify-center gap-3 cursor-pointer border border-[#ff7a1a]/50"
+            className="btn-tactile bg-[#e2231a] hover:bg-[#c91d15] text-[#f5f2eb] font-display text-2xl tracking-wider px-10 py-5 rounded-xl border border-[#b81710] transition-colors flex items-center justify-center gap-3 cursor-pointer active:translate-y-0.5"
           >
-            <Flame className="w-7 h-7 text-[#ffb703] fill-[#ffb703] animate-pulse" />
+            <Flame className="w-7 h-7 text-[#ffb703] fill-[#ffb703]" />
             <span>PEDIR AHORA 🍔</span>
             <ArrowRight className="w-6 h-6 text-white/90" />
           </motion.button>
